@@ -23,19 +23,19 @@ const statusConfig: Record<
 > = {
   [VideoStatus.PENDING]: {
     label: 'Pending',
-    color: 'bg-slate-500',
+    color: 'bg-muted-foreground',
     icon: <Clock className="h-3 w-3" />,
     progress: 0,
   },
   [VideoStatus.DOWNLOADING]: {
     label: 'Downloading',
-    color: 'bg-blue-500',
+    color: 'bg-secondary',
     icon: <Download className="h-3 w-3 animate-bounce" />,
     progress: 25,
   },
   [VideoStatus.PROCESSING]: {
     label: 'Processing',
-    color: 'bg-purple-500',
+    color: 'bg-primary',
     icon: <Loader2 className="h-3 w-3 animate-spin" />,
     progress: 60,
   },
@@ -47,7 +47,7 @@ const statusConfig: Record<
   },
   [VideoStatus.ERROR]: {
     label: 'Error',
-    color: 'bg-red-500',
+    color: 'bg-destructive',
     icon: <AlertCircle className="h-3 w-3" />,
     progress: 0,
   },
@@ -71,7 +71,9 @@ export function VideoCard({ video }: VideoCardProps) {
       await deleteVideo.mutateAsync(video.id);
       toast.success('Video deleted');
     } catch (error) {
-      toast.error('Failed to delete video');
+      if (error instanceof Error) {
+        toast.error(error.message);
+      }
     }
   };
 
@@ -80,36 +82,40 @@ export function VideoCard({ video }: VideoCardProps) {
       await generateCuts.mutateAsync(video.id);
       toast.success('Processing started! This may take a few minutes.');
     } catch (error) {
-      toast.error('Failed to start processing');
+      if (error instanceof Error) {
+        toast.error(error.message);
+      }
     }
   };
 
   return (
-    <Card className="group relative overflow-hidden border-slate-800 bg-gradient-to-br from-slate-900 to-slate-800 transition-all hover:shadow-xl hover:shadow-purple-500/10">
+    <Card className="group relative overflow-hidden glass-card card-gradient-border rounded-xl border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10">
       {/* Progress bar for active states */}
       {isProcessing && (
-        <div className="absolute left-0 top-0 right-0">
-          <Progress value={status.progress} className="h-1 rounded-none bg-slate-700" />
+        <div className="absolute left-0 top-0 right-0 z-10">
+          <Progress value={status.progress} className="h-1 rounded-none bg-muted" />
         </div>
       )}
 
-      <CardContent className="p-4">
+      <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           {/* Video Info */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-white truncate mb-1">
+            <h3 className="font-semibold text-foreground truncate mb-1.5 text-sm">
               {video.title || 'Untitled Video'}
             </h3>
-            <p className="text-xs text-slate-400 truncate mb-3">{video.url}</p>
+            <p className="text-xs text-muted-foreground/70 truncate mb-3">{video.url}</p>
 
             {/* Status Badge */}
             <div className="flex items-center gap-2">
-              <Badge className={`${status.color} text-white border-none flex items-center gap-1`}>
+              <Badge
+                className={`${status.color} text-white border-none flex items-center gap-1.5 text-xs px-2.5 py-0.5`}
+              >
                 {status.icon}
                 {status.label}
               </Badge>
               {video.error_message && (
-                <span className="text-xs text-red-400 truncate">{video.error_message}</span>
+                <span className="text-xs text-destructive truncate">{video.error_message}</span>
               )}
             </div>
           </div>
@@ -121,13 +127,13 @@ export function VideoCard({ video }: VideoCardProps) {
                 size="sm"
                 onClick={handleGenerate}
                 disabled={generateCuts.isPending}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all rounded-lg h-9 px-4"
               >
                 {generateCuts.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    <Sparkles className="mr-1 h-4 w-4" />
+                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
                     Generate
                   </>
                 )}
@@ -138,7 +144,7 @@ export function VideoCard({ video }: VideoCardProps) {
               variant="ghost"
               onClick={handleDelete}
               disabled={deleteVideo.isPending}
-              className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg h-9 w-9 p-0"
             >
               {deleteVideo.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

@@ -3,50 +3,56 @@ import { ProcessedVideoList } from '@/components/ProcessedVideoList';
 import { VideoList } from '@/components/VideoList';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Video, Zap } from 'lucide-react';
+import { Sparkles, Video } from 'lucide-react';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Video Processor
-              </h1>
-              <p className="text-xs text-slate-400">AI-Powered Video Editing</p>
-            </div>
-          </div>
+    <main className="min-h-screen bg-background">
+      {/* Hero Header */}
+      <header className="relative py-16 text-center">
+        {/* AI Badge */}
+        <div className="inline-flex items-center gap-2 gradient-border px-4 py-1.5 mb-6">
+          <Sparkles className="h-3.5 w-3.5 text-secondary" />
+          <span className="text-xs font-medium text-muted-foreground">
+            AI-Powered Video Processor
+          </span>
         </div>
+
+        {/* Main Title */}
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+          <span className="text-foreground">Video </span>
+          <span className="text-gradient">Workbench</span>
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base px-4">
+          Download, process, and transcribe your YouTube videos automatically. High-quality clips
+          generated with advanced AI.
+        </p>
       </header>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 pb-16">
         {/* Add Video Form */}
-        <section className="mb-8">
+        <section className="mb-12">
           <AddVideoForm />
         </section>
 
-        <Separator className="bg-slate-800 mb-8" />
+        <Separator className="bg-border/50 mb-10" />
 
         {/* Tabs */}
         <Tabs defaultValue="videos" className="w-full">
-          <TabsList className="w-full max-w-md bg-slate-900 border border-slate-800 p-1">
+          <TabsList className="w-full max-w-md mx-auto glass-card rounded-xl p-1.5 mb-8 py-10">
             <TabsTrigger
               value="videos"
-              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white"
+              className="py-6 flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 transition-all"
             >
               <Video className="h-4 w-4 mr-2" />
               Videos
             </TabsTrigger>
             <TabsTrigger
               value="processed"
-              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-purple-600 data-[state=active]:text-white"
+              className="py-6 flex-1 rounded-lg data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-secondary/25 transition-all"
             >
               <Sparkles className="h-4 w-4 mr-2" />
               Processed
@@ -66,9 +72,11 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-6 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 text-center text-sm text-slate-500">
-          Video Processor • Powered by AI
+      <footer className="border-t border-border/30 py-8 mt-auto">
+        <div className="max-w-5xl mx-auto px-4 text-center text-sm text-muted-foreground">
+          <span className="text-gradient font-medium">Automate Videos</span>
+          <span className="mx-2">•</span>
+          Made by Dayvd
         </div>
       </footer>
     </main>
