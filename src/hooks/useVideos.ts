@@ -16,7 +16,7 @@ export function useVideos() {
   return useQuery<RawVideo[]>({
     queryKey: queryKeys.videos,
     queryFn: () => api.listVideos(),
-    refetchInterval: 5000, // Poll every 5s to update statuses
+    // refetchInterval: 5000, // Poll every 5s to update statuses
   });
 }
 
@@ -48,7 +48,7 @@ export function useProcessedVideos() {
   return useQuery<ProcessedVideo[]>({
     queryKey: queryKeys.processedVideos,
     queryFn: () => api.listProcessedVideos(),
-    refetchInterval: 5000, // Poll every 5s
+    // refetchInterval: 5000, // Poll every 5s
   });
 }
 
