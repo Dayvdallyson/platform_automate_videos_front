@@ -12,23 +12,49 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSocialConnections } from '@/hooks/useSocialConnections';
 import { useProcessedVideos, useUploadToPlatform } from '@/hooks/useVideos';
 import { api } from '@/lib/api';
-import { ProcessedVideo } from '@/types/video';
-import { AlertCircle, CheckCircle2, Clock, Loader2, Play, Sparkles, Upload } from 'lucide-react';
+import { ConnectionStatus, ProcessedVideo } from '@/types/video';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  Loader2,
+  Play,
+  Sparkles,
+  Upload,
+} from 'lucide-react';
 import { useState } from 'react';
+import { FaInstagram, FaTiktok } from 'react-icons/fa';
 import { toast } from 'sonner';
+
+// Character limits for platforms
+const CAPTION_LIMITS = {
+  tiktok: 150,
+  instagram: 2200,
+};
 
 interface ProcessedVideoCardProps {
   video: ProcessedVideo;
+  connections: ConnectionStatus[];
 }
 
-function ProcessedVideoCard({ video }: ProcessedVideoCardProps) {
+function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
   const [caption, setCaption] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploadingPlatform, setUploadingPlatform] = useState<'tiktok' | 'instagram' | null>(null);
   const uploadMutation = useUploadToPlatform();
 
   const previewUrl = video.preview_url ? api.getPreviewUrl(video.preview_url) : null;
+
+  // Check which platforms are connected
+  const tiktokConnection = connections.find((c) => c.platform === 'tiktok');
+  const instagramConnection = connections.find((c) => c.platform === 'instagram');
+  const isTiktokConnected = tiktokConnection?.connected ?? false;
+  const isInstagramConnected = instagramConnection?.connected ?? false;
+  const hasAnyConnection = isTiktokConnected || isInstagramConnected;
 
   const handleUpload = async (platform: 'tiktok' | 'instagram') => {
     if (!caption.trim()) {
@@ -36,17 +62,53 @@ function ProcessedVideoCard({ video }: ProcessedVideoCardProps) {
       return;
     }
 
+    // Check caption length
+    if (caption.length > CAPTION_LIMITS[platform]) {
+      toast.error(`Caption too long for ${platform} (max ${CAPTION_LIMITS[platform]} characters)`);
+      return;
+    }
+
+    // Instagram requires preview_url
+    if (platform === 'instagram' && !previewUrl) {
+      toast.error('Video preview required for Instagram upload');
+      return;
+    }
+
+    setUploadingPlatform(platform);
     try {
-      await uploadMutation.mutateAsync({
+      const result = await uploadMutation.mutateAsync({
         video_id: video.id,
         platform,
         caption: caption.trim(),
       });
-      toast.success(`Uploaded to ${platform}!`);
+
+      // Show success toast with link for Instagram
+      if (platform === 'instagram' && result.permalink) {
+        toast.success(
+          <div className="flex items-center gap-2">
+            <span>Uploaded to Instagram!</span>
+            <a
+              href={result.permalink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-primary underline"
+            >
+              View <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>,
+        );
+      } else {
+        toast.success(
+          `Successfully uploaded to ${platform === 'tiktok' ? 'TikTok' : 'Instagram'}!`,
+        );
+      }
+
       setDialogOpen(false);
       setCaption('');
-    } catch {
-      toast.error(`Failed to upload to ${platform}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : `Failed to upload to ${platform}`);
+    } finally {
+      setUploadingPlatform(null);
     }
   };
 
@@ -56,6 +118,10 @@ function ProcessedVideoCard({ video }: ProcessedVideoCardProps) {
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Get character limit based on caption length (use lower limit for display)
+  const currentLimit = Math.min(CAPTION_LIMITS.tiktok, CAPTION_LIMITS.instagram);
+  const isOverLimit = caption.length > currentLimit;
 
   return (
     <Card className="group overflow-hidden glass-card card-gradient-border rounded-xl border-0 hover:shadow-xl hover:shadow-secondary/10 transition-all duration-300">
@@ -108,9 +174,12 @@ function ProcessedVideoCard({ video }: ProcessedVideoCardProps) {
         {/* Upload Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg shadow-secondary/30 transition-all rounded-lg h-10">
+            <Button
+              className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg shadow-secondary/30 transition-all rounded-lg h-10"
+              disabled={!hasAnyConnection}
+            >
               <Upload className="mr-2 h-4 w-4" />
-              Upload to Platform
+              {hasAnyConnection ? 'Upload to Platform' : 'Connect Account First'}
             </Button>
           </DialogTrigger>
           <DialogContent className="glass-card border-0 rounded-2xl">
@@ -118,36 +187,85 @@ function ProcessedVideoCard({ video }: ProcessedVideoCardProps) {
               <DialogTitle className="text-foreground">Upload to Social Media</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
-              <Input
-                placeholder="Enter caption..."
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                className="bg-muted/30 border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
-              />
+              {/* Caption Input with Character Count */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    placeholder="Enter caption..."
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    maxLength={CAPTION_LIMITS.instagram}
+                    className="bg-muted/30 border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 pr-16"
+                  />
+                  <span
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 text-xs ${
+                      isOverLimit ? 'text-destructive' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {caption.length}/{currentLimit}
+                  </span>
+                </div>
+                {isOverLimit && (
+                  <p className="text-xs text-amber-500">
+                    Caption exceeds TikTok limit ({CAPTION_LIMITS.tiktok} chars)
+                  </p>
+                )}
+              </div>
+
+              {/* Platform Buttons */}
               <div className="flex gap-3">
+                {/* TikTok Button */}
                 <Button
                   onClick={() => handleUpload('tiktok')}
-                  disabled={uploadMutation.isPending}
-                  className="flex-1 bg-background/50 hover:bg-accent text-foreground border border-border/50 rounded-lg h-10"
+                  disabled={!isTiktokConnected || uploadMutation.isPending}
+                  className={`flex-1 h-10 rounded-lg font-medium ${
+                    isTiktokConnected
+                      ? 'bg-black hover:bg-zinc-800 text-white'
+                      : 'bg-muted/30 text-muted-foreground cursor-not-allowed'
+                  }`}
                 >
-                  {uploadMutation.isPending ? (
+                  {uploadingPlatform === 'tiktok' ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    'TikTok'
+                    <>
+                      <FaTiktok className="h-4 w-4 mr-2" />
+                      TikTok
+                    </>
                   )}
                 </Button>
+
+                {/* Instagram Button */}
                 <Button
                   onClick={() => handleUpload('instagram')}
-                  disabled={uploadMutation.isPending}
-                  className="flex-1 bg-linear-gradient-to-r from-primary via-secondary to-[#FF6B35] hover:opacity-90 text-white rounded-lg h-10"
+                  disabled={!isInstagramConnected || uploadMutation.isPending || !previewUrl}
+                  className={`flex-1 h-10 rounded-lg font-medium ${
+                    isInstagramConnected && previewUrl
+                      ? 'bg-linear-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] hover:opacity-90 text-white'
+                      : 'bg-muted/30 text-muted-foreground cursor-not-allowed'
+                  }`}
                 >
-                  {uploadMutation.isPending ? (
+                  {uploadingPlatform === 'instagram' ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    'Instagram'
+                    <>
+                      <FaInstagram className="h-4 w-4 mr-2" />
+                      Instagram
+                    </>
                   )}
                 </Button>
               </div>
+
+              {/* Helper text */}
+              {!hasAnyConnection && (
+                <p className="text-xs text-center text-muted-foreground">
+                  Connect your social accounts in the panel above to upload
+                </p>
+              )}
+              {!previewUrl && isInstagramConnected && (
+                <p className="text-xs text-center text-amber-500">
+                  Instagram upload requires video preview (not available for this clip)
+                </p>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -157,9 +275,10 @@ function ProcessedVideoCard({ video }: ProcessedVideoCardProps) {
 }
 
 export function ProcessedVideoList() {
-  const { data: videos, isLoading, error } = useProcessedVideos();
+  const { data: videos, isLoading: videosLoading, error } = useProcessedVideos();
+  const { data: connections, isLoading: connectionsLoading } = useSocialConnections();
 
-  console.log('xxxxxxxxxxxxxxxxx this is all videos', videos);
+  const isLoading = videosLoading || connectionsLoading;
 
   if (isLoading) {
     return (
@@ -216,7 +335,7 @@ export function ProcessedVideoList() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {videos.map((video) => (
-          <ProcessedVideoCard key={video.id} video={video} />
+          <ProcessedVideoCard key={video.id} video={video} connections={connections ?? []} />
         ))}
       </div>
     </div>

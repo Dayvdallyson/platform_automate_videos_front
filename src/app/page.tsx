@@ -1,5 +1,6 @@
 import { AddVideoForm } from '@/components/AddVideoForm';
 import { ProcessedVideoList } from '@/components/ProcessedVideoList';
+import { SocialConnectionsPanel } from '@/components/SocialConnectionsPanel';
 import { VideoList } from '@/components/VideoList';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -64,7 +65,11 @@ export default function Home() {
               <VideoList />
             </TabsContent>
 
-            <TabsContent value="processed" className="m-0">
+            <TabsContent value="processed" className="m-0 space-y-6">
+              {/* Social Connections Panel */}
+              <SocialConnectionsPanel />
+
+              {/* Processed Video List */}
               <ProcessedVideoList />
             </TabsContent>
           </div>

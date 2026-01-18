@@ -59,3 +59,38 @@ export interface MessageResponse {
 export interface OkResponse {
   ok: boolean;
 }
+
+// ============ Social Connections Types ============
+
+// Connection status for social media platforms
+export interface ConnectionStatus {
+  platform: 'tiktok' | 'instagram';
+  connected: boolean;
+  account_name: string | null;
+  account_id: string | null;
+  connected_at: string | null; // ISO datetime
+  expires_at: string | null; // ISO datetime
+}
+
+// OAuth URL response
+export interface OAuthResponse {
+  auth_url: string;
+  state: string;
+}
+
+// Disconnect response
+export interface DisconnectResponse {
+  status: string;
+  message: string;
+}
+
+// Enhanced upload response
+export interface UploadResponse {
+  status: string;
+  platform: string;
+  account?: string;
+  publish_id?: string; // TikTok
+  media_id?: string; // Instagram
+  permalink?: string; // Instagram URL
+  message?: string;
+}

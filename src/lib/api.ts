@@ -1,9 +1,13 @@
 import {
+  ConnectionStatus,
+  DisconnectResponse,
   MessageResponse,
+  OAuthResponse,
   OkResponse,
   ProcessedVideo,
   RawVideo,
   UploadRequest,
+  UploadResponse,
 } from '@/types/video';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -78,13 +82,50 @@ class ApiClient {
   /**
    * Upload a processed video to a social platform
    */
-  async uploadToPlatform(request: UploadRequest): Promise<{ status: string }> {
+  async uploadToPlatform(request: UploadRequest): Promise<UploadResponse> {
     const res = await fetch(`${this.baseUrl}/api/uploads/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });
-    if (!res.ok) throw new Error('Upload failed');
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.detail || 'Upload failed');
+    }
+    return res.json();
+  }
+
+  // ============ Social Connections API ============
+
+  /**
+   * Get connection status for all platforms
+   */
+  async getConnections(): Promise<ConnectionStatus[]> {
+    const res = await fetch(`${this.baseUrl}/api/uploads/connections`);
+    if (!res.ok) throw new Error('Failed to fetch connections');
+    return res.json();
+  }
+
+  /**
+   * Get OAuth URL for connecting a platform
+   */
+  async getConnectUrl(platform: 'tiktok' | 'instagram'): Promise<OAuthResponse> {
+    const res = await fetch(`${this.baseUrl}/api/uploads/connect/${platform}`);
+    if (res.status === 503) {
+      throw new Error(`${platform} credentials not configured on server`);
+    }
+    if (!res.ok) throw new Error('Failed to get auth URL');
+    return res.json();
+  }
+
+  /**
+   * Disconnect a platform
+   */
+  async disconnectPlatform(platform: 'tiktok' | 'instagram'): Promise<DisconnectResponse> {
+    const res = await fetch(`${this.baseUrl}/api/uploads/disconnect/${platform}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to disconnect');
     return res.json();
   }
 
