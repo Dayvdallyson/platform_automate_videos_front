@@ -22,31 +22,31 @@ const statusConfig: Record<
   { label: string; color: string; icon: React.ReactNode; progress: number }
 > = {
   [VideoStatus.PENDING]: {
-    label: 'Pending',
+    label: 'Pendente',
     color: 'bg-muted-foreground',
     icon: <Clock className="h-3 w-3" />,
     progress: 0,
   },
   [VideoStatus.DOWNLOADING]: {
-    label: 'Downloading',
+    label: 'Baixando',
     color: 'bg-secondary',
     icon: <Download className="h-3 w-3 animate-bounce" />,
     progress: 25,
   },
   [VideoStatus.PROCESSING]: {
-    label: 'Processing',
+    label: 'Processando',
     color: 'bg-primary',
     icon: <Loader2 className="h-3 w-3 animate-spin" />,
     progress: 60,
   },
   [VideoStatus.DONE]: {
-    label: 'Ready',
+    label: 'Pronto',
     color: 'bg-emerald-500',
     icon: <CheckCircle2 className="h-3 w-3" />,
     progress: 100,
   },
   [VideoStatus.ERROR]: {
-    label: 'Error',
+    label: 'Erro',
     color: 'bg-destructive',
     icon: <AlertCircle className="h-3 w-3" />,
     progress: 0,
@@ -69,7 +69,7 @@ export function VideoCard({ video }: VideoCardProps) {
   const handleDelete = async () => {
     try {
       await deleteVideo.mutateAsync(video.id);
-      toast.success('Video deleted');
+      toast.success('Vídeo excluído');
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -80,7 +80,7 @@ export function VideoCard({ video }: VideoCardProps) {
   const handleGenerate = async () => {
     try {
       await generateCuts.mutateAsync(video.id);
-      toast.success('Processing started! This may take a few minutes.');
+      toast.success('Processamento iniciado! Pode levar alguns minutos.');
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -102,7 +102,7 @@ export function VideoCard({ video }: VideoCardProps) {
           {/* Video Info */}
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-foreground truncate mb-1.5 text-sm">
-              {video.title || 'Untitled Video'}
+              {video.title || 'Vídeo sem título'}
             </h3>
             <p className="text-xs text-muted-foreground/70 truncate mb-3">{video.url}</p>
 
@@ -134,7 +134,7 @@ export function VideoCard({ video }: VideoCardProps) {
                 ) : (
                   <>
                     <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                    Generate
+                    Gerar Cortes
                   </>
                 )}
               </Button>

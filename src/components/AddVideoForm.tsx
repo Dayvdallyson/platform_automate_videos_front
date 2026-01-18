@@ -15,16 +15,16 @@ export function AddVideoForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) {
-      toast.error('Please enter a video URL');
+      toast.error('Por favor, cole o link do YouTube');
       return;
     }
 
     try {
       await createVideo.mutateAsync(url.trim());
-      toast.success('Video added! Download started in background.');
+      toast.success('Vídeo adicionado! Download iniciado em segundo plano.');
       setUrl('');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to add video');
+      toast.error(error instanceof Error ? error.message : 'Falha ao adicionar vídeo');
     }
   };
 
@@ -36,9 +36,9 @@ export function AddVideoForm() {
             <Plus className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Process New Video</h3>
+            <h3 className="font-semibold text-foreground">Criar Cortes Automaticamente</h3>
             <p className="text-xs text-muted-foreground">
-              Add a YouTube link to start transcribing
+              Cole o link do YouTube e receba vários cortes prontos para viralizar
             </p>
           </div>
         </div>
@@ -47,7 +47,7 @@ export function AddVideoForm() {
             <LinkIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="url"
-              placeholder="Paste YouTube URL here..."
+              placeholder="Cole o link do YouTube aqui..."
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               disabled={createVideo.isPending}
@@ -62,11 +62,11 @@ export function AddVideoForm() {
             {createVideo.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding...
+                Processando...
               </>
             ) : (
               <>
-                Start Now
+                Gerar Cortes
                 <span className="ml-1">→</span>
               </>
             )}

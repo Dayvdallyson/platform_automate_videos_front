@@ -34,9 +34,9 @@ export function VideoList() {
       <Card className="glass-card rounded-xl border-destructive/20">
         <CardContent className="p-8 text-center">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <p className="text-destructive font-medium">Failed to load videos</p>
+          <p className="text-destructive font-medium">Falha ao carregar vídeos</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Make sure the backend is running on localhost:8000
+            Verifique se o backend está rodando em localhost:8000
           </p>
         </CardContent>
       </Card>
@@ -50,8 +50,10 @@ export function VideoList() {
           <div className="h-16 w-16 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-5">
             <Video className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-medium text-foreground mb-2">No videos yet</h3>
-          <p className="text-sm text-muted-foreground">Add a YouTube URL above to get started</p>
+          <h3 className="text-lg font-medium text-foreground mb-2">Nenhum vídeo ainda</h3>
+          <p className="text-sm text-muted-foreground">
+            Cole um link do YouTube acima para começar
+          </p>
         </CardContent>
       </Card>
     );
@@ -62,9 +64,9 @@ export function VideoList() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <Video className="h-5 w-5 text-primary" />
-          Your Videos
+          Seus Vídeos
         </h2>
-        <span className="text-sm text-muted-foreground">{videos.length} videos</span>
+        <span className="text-sm text-muted-foreground">{videos.length} vídeos</span>
       </div>
 
       <div className="space-y-3">

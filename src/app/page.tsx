@@ -13,18 +13,18 @@ export default function Home() {
         <div className="inline-flex items-center gap-2 gradient-border px-4 py-1.5 mb-6">
           <Sparkles className="h-3.5 w-3.5 text-secondary" />
           <span className="text-xs font-medium text-muted-foreground">
-            AI-Powered Video Processor
+            Criação de cortes com IA
           </span>
         </div>
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-          <span className="text-foreground">Video </span>
-          <span className="text-gradient">Workbench</span>
+          <span className="text-foreground">Transforme vídeos longos em </span>
+          <span className="text-gradient">cortes virais</span>
         </h1>
 
         <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base px-4">
-          Download, process, and transcribe your YouTube videos automatically. High-quality clips
-          generated with advanced AI.
+          Cole um link do YouTube e deixe a IA fazer o trabalho pesado: baixar, transcrever e gerar
+          automaticamente cortes prontos para TikTok, Reels e Shorts.
         </p>
       </header>
 
@@ -42,14 +42,14 @@ export default function Home() {
               className="py-6 flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 transition-all"
             >
               <Video className="h-4 w-4 mr-2" />
-              Videos
+              Vídeos Originais
             </TabsTrigger>
             <TabsTrigger
               value="processed"
               className="py-6 flex-1 rounded-lg data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-secondary/25 transition-all"
             >
               <Sparkles className="h-4 w-4 mr-2" />
-              Processed
+              Cortes Gerados
             </TabsTrigger>
           </TabsList>
 
@@ -69,9 +69,9 @@ export default function Home() {
 
       <footer className="border-t border-border/30 py-8 mt-auto">
         <div className="max-w-5xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          <span className="text-gradient font-medium">Automate Videos</span>
+          <span className="text-gradient font-medium">Automatize sua criação</span>
           <span className="mx-2">•</span>
-          Made by Dayvd
+          Criado por Dayvd
         </div>
       </footer>
     </main>

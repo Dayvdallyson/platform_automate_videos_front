@@ -37,9 +37,9 @@ function PlatformCard({ platform, connection, isLoading }: PlatformCardProps) {
   const handleConnect = async () => {
     try {
       await connectMutation.mutateAsync(platform);
-      toast.info(`Opening ${isTikTok ? 'TikTok' : 'Instagram'} login...`);
+      toast.info(`Abrindo login do ${isTikTok ? 'TikTok' : 'Instagram'}...`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to connect');
+      toast.error(error instanceof Error ? error.message : 'Falha ao conectar');
     }
   };
 
@@ -51,9 +51,9 @@ function PlatformCard({ platform, connection, isLoading }: PlatformCardProps) {
 
     try {
       await disconnectMutation.mutateAsync(platform);
-      toast.success(`Disconnected from ${isTikTok ? 'TikTok' : 'Instagram'}`);
+      toast.success(`Desconectado do ${isTikTok ? 'TikTok' : 'Instagram'}`);
     } catch {
-      toast.error('Failed to disconnect');
+      toast.error('Falha ao desconectar');
     } finally {
       setConfirming(false);
     }
@@ -117,7 +117,7 @@ function PlatformCard({ platform, connection, isLoading }: PlatformCardProps) {
               {isConnected && (
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-none text-xs">
                   <Check className="h-3 w-3 mr-1" />
-                  Connected
+                  Conectado
                 </Badge>
               )}
               {isExpiringSoon && (
@@ -128,7 +128,7 @@ function PlatformCard({ platform, connection, isLoading }: PlatformCardProps) {
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {isConnected && accountName ? `@${accountName}` : 'Not connected'}
+              {isConnected && accountName ? `@${accountName}` : 'Não conectado'}
             </p>
           </div>
 
@@ -149,11 +149,11 @@ function PlatformCard({ platform, connection, isLoading }: PlatformCardProps) {
               {disconnectMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : confirming ? (
-                'Confirm?'
+                'Confirmar?'
               ) : (
                 <>
                   <Unlink className="h-4 w-4 mr-1" />
-                  Disconnect
+                  Desconectar
                 </>
               )}
             </Button>
@@ -174,7 +174,7 @@ function PlatformCard({ platform, connection, isLoading }: PlatformCardProps) {
               ) : (
                 <>
                   <Link2 className="h-4 w-4 mr-1" />
-                  Connect
+                  Conectar
                 </>
               )}
             </Button>
@@ -196,7 +196,7 @@ export function SocialConnectionsPanel() {
       <Card className="glass-card border-0 rounded-xl">
         <CardContent className="p-6 text-center">
           <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-          <p className="text-sm text-destructive">Failed to load connections</p>
+          <p className="text-sm text-destructive">Falha ao carregar conexões</p>
         </CardContent>
       </Card>
     );
@@ -207,7 +207,7 @@ export function SocialConnectionsPanel() {
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-medium text-foreground flex items-center gap-2">
           <Link2 className="h-4 w-4 text-primary" />
-          Social Media Accounts
+          Contas de Redes Sociais
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-0">
