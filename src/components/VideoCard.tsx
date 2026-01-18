@@ -90,7 +90,6 @@ export function VideoCard({ video }: VideoCardProps) {
 
   return (
     <Card className="group relative overflow-hidden glass-card card-gradient-border rounded-xl border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10">
-      {/* Progress bar for active states */}
       {isProcessing && (
         <div className="absolute left-0 top-0 right-0 z-10">
           <Progress value={status.progress} className="h-1 rounded-none bg-muted" />
@@ -99,14 +98,12 @@ export function VideoCard({ video }: VideoCardProps) {
 
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
-          {/* Video Info */}
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-foreground truncate mb-1.5 text-sm">
               {video.title || 'Vídeo sem título'}
             </h3>
             <p className="text-xs text-muted-foreground/70 truncate mb-3">{video.url}</p>
 
-            {/* Status Badge */}
             <div className="flex items-center gap-2">
               <Badge
                 className={`${status.color} text-white border-none flex items-center gap-1.5 text-xs px-2.5 py-0.5`}
@@ -120,7 +117,6 @@ export function VideoCard({ video }: VideoCardProps) {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-2">
             {isReady && (
               <Button

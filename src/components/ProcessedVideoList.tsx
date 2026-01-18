@@ -30,7 +30,6 @@ import { useState } from 'react';
 import { FaInstagram, FaTiktok } from 'react-icons/fa';
 import { toast } from 'sonner';
 
-// Character limits for platforms
 const CAPTION_LIMITS = {
   tiktok: 150,
   instagram: 2200,
@@ -49,7 +48,6 @@ function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
 
   const previewUrl = video.preview_url ? api.getPreviewUrl(video.preview_url) : null;
 
-  // Check which platforms are connected
   const tiktokConnection = connections.find((c) => c.platform === 'tiktok');
   const instagramConnection = connections.find((c) => c.platform === 'instagram');
   const isTiktokConnected = tiktokConnection?.connected ?? false;
@@ -62,7 +60,6 @@ function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
       return;
     }
 
-    // Check caption length
     if (caption.length > CAPTION_LIMITS[platform]) {
       toast.error(
         `Legenda muito longa para ${platform === 'tiktok' ? 'TikTok' : 'Instagram'} (máx ${CAPTION_LIMITS[platform]} caracteres)`,
@@ -70,7 +67,6 @@ function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
       return;
     }
 
-    // Instagram requires preview_url
     if (platform === 'instagram' && !previewUrl) {
       toast.error('Preview do vídeo necessário para upload no Instagram');
       return;
@@ -84,7 +80,6 @@ function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
         caption: caption.trim(),
       });
 
-      // Show success toast with link for Instagram
       if (platform === 'instagram' && result.permalink) {
         toast.success(
           <div className="flex items-center gap-2">
@@ -121,18 +116,16 @@ function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Get character limit based on caption length (use lower limit for display)
   const currentLimit = Math.min(CAPTION_LIMITS.tiktok, CAPTION_LIMITS.instagram);
   const isOverLimit = caption.length > currentLimit;
 
   return (
     <Card className="group overflow-hidden glass-card card-gradient-border rounded-xl border-0 hover:shadow-xl hover:shadow-secondary/10 transition-all duration-300">
-      {/* Video Preview */}
       <div className="relative aspect-9/16 max-h-[300px] bg-background/50 rounded-t-xl overflow-hidden">
         {previewUrl ? (
           <video
             src={previewUrl}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             controls
             preload="metadata"
           />
@@ -142,7 +135,6 @@ function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
           </div>
         )}
 
-        {/* Duration Badge */}
         {video.duration && (
           <Badge className="absolute bottom-2 right-2 bg-background/70 text-foreground border-none">
             <Clock className="h-3 w-3 mr-1" />
