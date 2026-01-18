@@ -9,9 +9,7 @@ import { Sparkles, Video } from 'lucide-react';
 export default function Home() {
   return (
     <main className="min-h-screen bg-background">
-      {/* Hero Header */}
       <header className="relative py-16 text-center">
-        {/* AI Badge */}
         <div className="inline-flex items-center gap-2 gradient-border px-4 py-1.5 mb-6">
           <Sparkles className="h-3.5 w-3.5 text-secondary" />
           <span className="text-xs font-medium text-muted-foreground">
@@ -19,29 +17,24 @@ export default function Home() {
           </span>
         </div>
 
-        {/* Main Title */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
           <span className="text-foreground">Video </span>
           <span className="text-gradient">Workbench</span>
         </h1>
 
-        {/* Subtitle */}
         <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base px-4">
           Download, process, and transcribe your YouTube videos automatically. High-quality clips
           generated with advanced AI.
         </p>
       </header>
 
-      {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 pb-16">
-        {/* Add Video Form */}
         <section className="mb-12">
           <AddVideoForm />
         </section>
 
         <Separator className="bg-border/50 mb-10" />
 
-        {/* Tabs */}
         <Tabs defaultValue="videos" className="w-full">
           <TabsList className="w-full max-w-md mx-auto glass-card rounded-xl p-1.5 mb-8 py-10">
             <TabsTrigger
@@ -66,17 +59,14 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="processed" className="m-0 space-y-6">
-              {/* Social Connections Panel */}
               <SocialConnectionsPanel />
 
-              {/* Processed Video List */}
               <ProcessedVideoList />
             </TabsContent>
           </div>
         </Tabs>
       </div>
 
-      {/* Footer */}
       <footer className="border-t border-border/30 py-8 mt-auto">
         <div className="max-w-5xl mx-auto px-4 text-center text-sm text-muted-foreground">
           <span className="text-gradient font-medium">Automate Videos</span>
