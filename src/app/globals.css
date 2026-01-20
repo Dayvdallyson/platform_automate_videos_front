@@ -229,4 +229,61 @@
       0 0 20px rgba(53, 198, 244, 0.3),
       0 0 40px rgba(53, 198, 244, 0.1);
   }
+
+  /* Infinite Carousel */
+  .carousel-container {
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .carousel-track {
+    display: flex;
+    gap: 1.5rem;
+    animation: scroll 30s linear infinite;
+  }
+
+  .carousel-track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-100% / 3));
+    }
+  }
+
+  .style-card {
+    background: oklch(from var(--card) l c h / 0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(124, 92, 255, 0.15);
+    box-shadow:
+      0 0 0 1px rgba(124, 92, 255, 0.1),
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    overflow: hidden;
+    flex-shrink: 0;
+    width: 280px;
+    transition: all 0.3s ease;
+  }
+
+  .style-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow:
+      0 0 0 1px rgba(124, 92, 255, 0.25),
+      0 0 30px rgba(124, 92, 255, 0.2),
+      0 20px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .style-card-image {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    object-fit: cover;
+    background: linear-gradient(135deg, #1a1f29, #232a36);
+  }
 }
