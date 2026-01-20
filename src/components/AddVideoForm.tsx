@@ -20,7 +20,7 @@ export function AddVideoForm() {
     }
 
     try {
-      await createVideo.mutateAsync(url.trim());
+      await createVideo.mutateAsync({ url: url.trim() });
       toast.success('Vídeo adicionado! Download iniciado em segundo plano.');
       setUrl('');
     } catch (error) {

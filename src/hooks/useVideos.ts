@@ -20,7 +20,7 @@ export function useCreateVideo() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (url: string) => api.createVideo(url),
+    mutationFn: ({ url, userId }: { url: string; userId?: number }) => api.createVideo(url, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.videos });
     },
@@ -49,8 +49,8 @@ export function useGenerateCuts() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ videoId, style }: { videoId: number; style: string }) =>
-      api.generateCuts(videoId, style),
+    mutationFn: ({ videoId, style, userId }: { videoId: number; style: string; userId?: number }) =>
+      api.generateCuts(videoId, style, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.videos });
       queryClient.invalidateQueries({ queryKey: queryKeys.processedVideos });

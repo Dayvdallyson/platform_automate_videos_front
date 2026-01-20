@@ -1,11 +1,6 @@
-import { AddVideoForm } from '@/components/AddVideoForm';
-import { ProcessedVideoList } from '@/components/ProcessedVideoList';
-import { SocialConnectionsPanel } from '@/components/SocialConnectionsPanel';
 import { StyleCarousel } from '@/components/StyleCarousel';
-import { VideoList } from '@/components/VideoList';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Video } from 'lucide-react';
+import { SubscriptionWrapper } from '@/components/SubscriptionWrapper';
+import { Sparkles } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -31,44 +26,7 @@ export default function Home() {
 
       <StyleCarousel />
 
-      <div className="max-w-5xl mx-auto px-4 py-16">
-        <section className="mb-12">
-          <AddVideoForm />
-        </section>
-
-        <Separator className="bg-border/50 mb-10" />
-
-        <Tabs defaultValue="videos" className="w-full">
-          <TabsList className="w-full max-w-md mx-auto glass-card rounded-xl p-1.5 mb-8 py-10">
-            <TabsTrigger
-              value="videos"
-              className="py-6 flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 transition-all"
-            >
-              <Video className="h-4 w-4 mr-2" />
-              Vídeos Originais
-            </TabsTrigger>
-            <TabsTrigger
-              value="processed"
-              className="py-6 flex-1 rounded-lg data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-secondary/25 transition-all"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Cortes Gerados
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="mt-6">
-            <TabsContent value="videos" className="m-0">
-              <VideoList />
-            </TabsContent>
-
-            <TabsContent value="processed" className="m-0 space-y-6">
-              <SocialConnectionsPanel />
-
-              <ProcessedVideoList />
-            </TabsContent>
-          </div>
-        </Tabs>
-      </div>
+      <SubscriptionWrapper />
 
       <footer className="border-t border-border/30 py-8 mt-auto">
         <div className="max-w-5xl mx-auto px-4 text-center text-sm text-muted-foreground">
