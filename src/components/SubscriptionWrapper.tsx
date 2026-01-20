@@ -7,68 +7,53 @@ import { ProcessedVideoList } from '@/components/ProcessedVideoList';
 import { SocialConnectionsPanel } from '@/components/SocialConnectionsPanel';
 import { UsageCard } from '@/components/UsageCard';
 import { VideoList } from '@/components/VideoList';
+import { useAuth } from '@/components/auth-provider';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  getStoredUserId,
-  setStoredUserId,
-  subscriptionQueryKeys,
-  useCreateUser,
-  usePlans,
-  useUpgradePlan,
-  useUsage,
-} from '@/hooks/useSubscription';
+import { usePlans, useUpgradePlan, useUsage } from '@/hooks/useSubscription';
+import { billingService } from '@/lib/billing';
+import { BillingPlanId } from '@/types/billing';
 import { PlanType } from '@/types/subscription';
-import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, Sparkles, Video } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export function SubscriptionWrapper() {
-  // Initialize user ID from storage
-  const [userId, setUserId] = useState<number | null>(() => {
-    if (typeof window !== 'undefined') {
-      return getStoredUserId();
-    }
-    return null;
-  });
+  const { user, isLoading: authLoading } = useAuth();
   const [plansModalOpen, setPlansModalOpen] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const { data: usage, isLoading: usageLoading } = useUsage(userId);
+  const { data: usage, isLoading: usageLoading } = useUsage(user?.id ?? null);
   const { data: plans, isLoading: plansLoading } = usePlans();
   const upgradePlan = useUpgradePlan();
-  const createUser = useCreateUser();
 
-  const hasSubscription = !!usage;
+  const hasSubscription = !!user && !!usage;
 
   const handleSelectPlan = async (plan: PlanType) => {
+    if (!user) {
+      toast.error('Usuário não encontrado. Por favor, faça login novamente.');
+      return;
+    }
+
     try {
-      // Create new user with selected plan
-      const user = await createUser.mutateAsync({
-        email: `user${Date.now()}@demo.com`,
-        name: 'Usuário Demo',
-        plan_type: plan,
-      });
+      setIsSubscribing(true);
 
-      setStoredUserId(user.id);
-      setUserId(user.id);
+      // Call billing API to create subscription and get Mercado Pago checkout URL
+      const response = await billingService.createSubscription(plan as BillingPlanId, user.id);
 
-      // Invalidate queries to fetch fresh data
-      queryClient.invalidateQueries({ queryKey: subscriptionQueryKeys.usage(user.id) });
-
-      toast.success(`Plano ${plan.toUpperCase()} ativado com sucesso!`);
+      // Redirect to Mercado Pago checkout
+      billingService.redirectToCheckout(response.init_point);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Falha ao selecionar plano');
+      toast.error(error instanceof Error ? error.message : 'Falha ao criar assinatura');
+      setIsSubscribing(false);
     }
   };
 
   const handleUpgrade = async (plan: PlanType) => {
-    if (!userId) return;
+    if (!user) return;
 
     try {
-      await upgradePlan.mutateAsync({ userId, newPlan: plan });
+      await upgradePlan.mutateAsync({ userId: user.id, newPlan: plan });
       toast.success(`Upgrade para ${plan.toUpperCase()} realizado com sucesso!`);
       setPlansModalOpen(false);
     } catch (error) {
@@ -76,8 +61,7 @@ export function SubscriptionWrapper() {
     }
   };
 
-  // Show loading while fetching data
-  if (plansLoading || (userId && usageLoading)) {
+  if (authLoading || plansLoading || (user && usageLoading)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -89,7 +73,7 @@ export function SubscriptionWrapper() {
   if (!hasSubscription && !usageLoading && plans) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-16">
-        <PlanCards plans={plans} onSelectPlan={handleSelectPlan} isLoading={createUser.isPending} />
+        <PlanCards plans={plans} onSelectPlan={handleSelectPlan} isLoading={isSubscribing} />
       </div>
     );
   }
@@ -99,7 +83,7 @@ export function SubscriptionWrapper() {
     <>
       <div className="max-w-5xl mx-auto px-4 py-16">
         {/* Usage Card */}
-        {usage && (
+        {user && usage && (
           <section className="mb-8">
             <UsageCard usage={usage} onUpgrade={() => setPlansModalOpen(true)} />
           </section>

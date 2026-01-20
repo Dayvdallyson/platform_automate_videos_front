@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/components/auth-provider';
 import { Button } from '@/components/ui/button';
 import { PlanInfo, PlanType } from '@/types/subscription';
 import {
@@ -13,6 +14,7 @@ import {
   Video,
   Zap,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface PlanCardsProps {
   plans: PlanInfo[];
@@ -61,6 +63,17 @@ function formatPrice(price: number): string {
 }
 
 export function PlanCards({ plans, onSelectPlan, isLoading }: PlanCardsProps) {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleSelectPlan = (planType: PlanType) => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    onSelectPlan(planType);
+  };
+
   const orderedPlans = ['basic', 'pro', 'business'] as const;
   const sortedPlans = orderedPlans
     .map((type) => plans.find((p) => p.type === type))
@@ -141,7 +154,7 @@ export function PlanCards({ plans, onSelectPlan, isLoading }: PlanCardsProps) {
               {/* CTA Button */}
               <Button
                 className={`w-full bg-linear-gradient-to-r ${colors.gradient} text-white hover:opacity-90 shadow-lg`}
-                onClick={() => onSelectPlan(plan.type)}
+                onClick={() => handleSelectPlan(plan.type)}
                 disabled={isLoading}
               >
                 {isLoading ? (
