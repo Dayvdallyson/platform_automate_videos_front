@@ -58,7 +58,7 @@ class BillingService {
         if (typeof error.detail === 'string') {
           errorMessage = error.detail;
         } else if (Array.isArray(error.detail)) {
-          errorMessage = error.detail.map((e) => e.msg).join(', ');
+          errorMessage = error.detail.map((e: { msg: string }) => e.msg).join(', ');
         } else {
           errorMessage = JSON.stringify(error.detail);
         }

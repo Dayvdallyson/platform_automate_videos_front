@@ -34,7 +34,7 @@ export default function LoginPage() {
       setError('');
       await login(data);
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      setError(err instanceof Error ? err.message : 'Failed to login');
     }
   };
 
@@ -140,7 +140,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity h-11 font-medium"
+              className="w-full bg-linear-to-r from-primary to-secondary hover:opacity-90 transition-opacity h-11 font-medium"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -157,7 +157,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link
               href="/register"
               className="text-primary hover:text-primary/80 font-medium transition-colors hover:underline underline-offset-4"
