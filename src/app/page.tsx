@@ -1,6 +1,7 @@
 import { AddVideoForm } from '@/components/AddVideoForm';
 import { ProcessedVideoList } from '@/components/ProcessedVideoList';
 import { SocialConnectionsPanel } from '@/components/SocialConnectionsPanel';
+import { StyleCarousel } from '@/components/StyleCarousel';
 import { VideoList } from '@/components/VideoList';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,7 +29,9 @@ export default function Home() {
         </p>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 pb-16">
+      <StyleCarousel />
+
+      <div className="max-w-5xl mx-auto px-4 py-16">
         <section className="mb-12">
           <AddVideoForm />
         </section>

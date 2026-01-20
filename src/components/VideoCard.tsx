@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useDeleteVideo, useGenerateCuts } from '@/hooks/useVideos';
-import { RawVideo, VideoStatus } from '@/types/video';
+import { api } from '@/lib/api';
+import { CutStyle, RawVideo, VideoStatus } from '@/types/video';
 import {
   AlertCircle,
   CheckCircle2,
@@ -15,7 +16,16 @@ import {
   Sparkles,
   Trash2,
 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+
+const cutStyleOptions: { value: CutStyle; label: string; icon: string }[] = [
+  { value: 'viral', label: 'Viral', icon: '🎯' },
+  { value: 'podcast', label: 'Podcast', icon: '🎙️' },
+  { value: 'educational', label: 'Educacional', icon: '📚' },
+  { value: 'humor', label: 'Humor', icon: '😂' },
+  { value: 'business', label: 'Negócios', icon: '💼' },
+];
 
 const statusConfig: Record<
   VideoStatus,
@@ -60,6 +70,7 @@ interface VideoCardProps {
 export function VideoCard({ video }: VideoCardProps) {
   const deleteVideo = useDeleteVideo();
   const generateCuts = useGenerateCuts();
+  const [selectedStyle, setSelectedStyle] = useState<CutStyle>('viral');
 
   const status = statusConfig[video.status];
   const isReady = video.status === VideoStatus.DONE;
@@ -79,7 +90,7 @@ export function VideoCard({ video }: VideoCardProps) {
 
   const handleGenerate = async () => {
     try {
-      await generateCuts.mutateAsync(video.id);
+      await generateCuts.mutateAsync({ videoId: video.id, style: selectedStyle });
       toast.success('Processamento iniciado! Pode levar alguns minutos.');
     } catch (error) {
       if (error instanceof Error) {
@@ -97,6 +108,17 @@ export function VideoCard({ video }: VideoCardProps) {
       )}
 
       <CardContent className="p-5">
+        {video.video_url && (
+          <div className="mb-4 rounded-lg overflow-hidden bg-black/20 aspect-video">
+            <video
+              src={api.getPreviewUrl(video.video_url)}
+              className="w-full h-full object-contain"
+              controls
+              preload="metadata"
+            />
+          </div>
+        )}
+
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-foreground truncate mb-1.5 text-sm">
@@ -117,23 +139,61 @@ export function VideoCard({ video }: VideoCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
             {isReady && (
-              <Button
-                size="sm"
-                onClick={handleGenerate}
-                disabled={generateCuts.isPending}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all rounded-lg h-9 px-4"
-              >
-                {generateCuts.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                    Gerar Cortes
-                  </>
-                )}
-              </Button>
+              <>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">Estilo:</span>
+                  <div className="flex gap-1">
+                    {cutStyleOptions.map((option) => (
+                      <div key={option.value} className="relative group/tooltip">
+                        <button
+                          onClick={() => setSelectedStyle(option.value)}
+                          disabled={generateCuts.isPending}
+                          className={`text-xs px-2.5 py-1.5 rounded-md transition-all cursor-pointer
+                            ${
+                              selectedStyle === option.value
+                                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30'
+                                : 'bg-muted/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:shadow-md hover:shadow-primary/30'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          <span className="text-sm">{option.icon}</span>
+                        </button>
+                        {/* Tooltip */}
+                        <div
+                          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5
+                          bg-primary text-primary-foreground text-xs font-medium rounded-lg
+                          opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible
+                          transition-all duration-200 whitespace-nowrap shadow-lg shadow-primary/30 z-50
+                          pointer-events-none"
+                        >
+                          {option.label}
+                          {/* Arrow */}
+                          <div
+                            className="absolute top-full left-1/2 -translate-x-1/2
+                            border-4 border-transparent border-t-primary"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleGenerate}
+                  disabled={generateCuts.isPending}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all rounded-lg h-9 px-4"
+                >
+                  {generateCuts.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                      Gerar Cortes
+                    </>
+                  )}
+                </Button>
+              </>
             )}
             <Button
               size="sm"

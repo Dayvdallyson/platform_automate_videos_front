@@ -6,11 +6,14 @@ export enum VideoStatus {
   ERROR = 'error',
 }
 
+export type CutStyle = 'viral' | 'podcast' | 'educational' | 'humor' | 'business';
+
 export interface RawVideo {
   id: number;
   url: string;
   title: string | null;
   file_path: string | null;
+  video_url: string | null;
   status: VideoStatus;
   created_at: string;
   error_message: string | null;

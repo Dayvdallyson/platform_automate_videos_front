@@ -49,7 +49,8 @@ export function useGenerateCuts() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (videoId: number) => api.generateCuts(videoId),
+    mutationFn: ({ videoId, style }: { videoId: number; style: string }) =>
+      api.generateCuts(videoId, style),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.videos });
       queryClient.invalidateQueries({ queryKey: queryKeys.processedVideos });

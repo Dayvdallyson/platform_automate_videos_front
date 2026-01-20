@@ -44,10 +44,13 @@ class ApiClient {
     return res.json();
   }
 
-  async generateCuts(videoId: number): Promise<MessageResponse> {
-    const res = await fetch(`${this.baseUrl}/api/processed/${videoId}/generate`, {
-      method: 'POST',
-    });
+  async generateCuts(videoId: number, style: string = 'viral'): Promise<MessageResponse> {
+    const res = await fetch(
+      `${this.baseUrl}/api/processed/${videoId}/generate?style=${encodeURIComponent(style)}`,
+      {
+        method: 'POST',
+      },
+    );
     if (!res.ok) throw new Error('Failed to start processing');
     return res.json();
   }
