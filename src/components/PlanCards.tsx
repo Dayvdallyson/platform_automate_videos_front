@@ -1,7 +1,7 @@
 'use client';
 
 import { PlanCard } from '@/components/PlanCard';
-import { getStoredUserId } from '@/hooks/useSubscription';
+import { useAuth } from '@/components/auth-provider';
 import { billingService } from '@/lib/billing';
 import {
   BillingPlanId,
@@ -15,12 +15,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 export default function PlanCards() {
   const router = useRouter();
-  const [userId] = useState<number | null>(() => {
-    if (typeof window !== 'undefined') {
-      return getStoredUserId();
-    }
-    return null;
-  });
+  const { user, isLoading: authLoading } = useAuth();
+  const userId = user?.id ?? null;
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatusResponse | null>(
     null,
   );
@@ -29,6 +25,10 @@ export default function PlanCards() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchSubscriptionStatus = useCallback(async () => {
+    if (authLoading) {
+      return;
+    }
+
     if (!userId) {
       setIsLoadingStatus(false);
       return;
@@ -43,7 +43,7 @@ export default function PlanCards() {
     } finally {
       setIsLoadingStatus(false);
     }
-  }, [userId]);
+  }, [userId, authLoading]);
 
   useEffect(() => {
     fetchSubscriptionStatus();
@@ -73,7 +73,6 @@ export default function PlanCards() {
 
   return (
     <main className="min-h-screen bg-background py-16 px-4">
-      {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 gradient-border px-4 py-1.5 mb-6">
           <Crown className="h-3.5 w-3.5 text-secondary" />
@@ -119,7 +118,7 @@ export default function PlanCards() {
               isPopular: plan.isPopular,
             }}
             features={plan.features.map((f) => ({ text: f }))}
-            isLoading={isSubscribing === plan.id || isLoadingStatus}
+            isLoading={isSubscribing === plan.id || isLoadingStatus || authLoading}
             isCurrent={isCurrentPlan(plan.id)}
             onSubscribe={() => handleSubscribe(plan.id)}
           />
