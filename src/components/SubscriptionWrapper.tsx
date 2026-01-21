@@ -1,7 +1,7 @@
 'use client';
 
 import { AddVideoForm } from '@/components/AddVideoForm';
-import { PlanCards } from '@/components/PlanCards';
+import PlanCards from '@/components/PlanCards';
 import { PlansModal } from '@/components/PlansModal';
 import { ProcessedVideoList } from '@/components/ProcessedVideoList';
 import { SocialConnectionsPanel } from '@/components/SocialConnectionsPanel';
@@ -10,54 +10,34 @@ import { VideoList } from '@/components/VideoList';
 import { useAuth } from '@/components/auth-provider';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePlans, useUpgradePlan, useUsage } from '@/hooks/useSubscription';
+import { usePlans, useUsage } from '@/hooks/useSubscription';
 import { billingService } from '@/lib/billing';
 import { BillingPlanId } from '@/types/billing';
 import { PlanType } from '@/types/subscription';
 import { Loader2, Sparkles, Video } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'sonner';
 
 export function SubscriptionWrapper() {
   const { user, isLoading: authLoading } = useAuth();
   const [plansModalOpen, setPlansModalOpen] = useState(false);
-  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   const { data: usage, isLoading: usageLoading } = useUsage(user?.id ?? null);
   const { data: plans, isLoading: plansLoading } = usePlans();
-  const upgradePlan = useUpgradePlan();
 
   const hasSubscription = !!user && !!usage;
-
-  const handleSelectPlan = async (plan: PlanType) => {
-    if (!user) {
-      toast.error('Usuário não encontrado. Por favor, faça login novamente.');
-      return;
-    }
-
-    try {
-      setIsSubscribing(true);
-
-      // Call billing API to create subscription and get Mercado Pago checkout URL
-      const response = await billingService.createSubscription(plan as BillingPlanId, user.id);
-
-      // Redirect to Mercado Pago checkout
-      billingService.redirectToCheckout(response.init_point);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Falha ao criar assinatura');
-      setIsSubscribing(false);
-    }
-  };
 
   const handleUpgrade = async (plan: PlanType) => {
     if (!user) return;
 
     try {
-      await upgradePlan.mutateAsync({ userId: user.id, newPlan: plan });
-      toast.success(`Upgrade para ${plan.toUpperCase()} realizado com sucesso!`);
-      setPlansModalOpen(false);
+      setIsUpgrading(true);
+      const planId = plan as BillingPlanId;
+      const response = await billingService.createSubscription(planId, user.id);
+      billingService.redirectToCheckout(response.init_point);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Falha ao fazer upgrade');
+      console.error(error);
+      setIsUpgrading(false);
     }
   };
 
@@ -69,20 +49,17 @@ export function SubscriptionWrapper() {
     );
   }
 
-  // User has no subscription - show plan selection
   if (!hasSubscription && !usageLoading && plans) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-16">
-        <PlanCards plans={plans} onSelectPlan={handleSelectPlan} isLoading={isSubscribing} />
+        <PlanCards />
       </div>
     );
   }
 
-  // User has subscription - show normal interface
   return (
     <>
       <div className="max-w-5xl mx-auto px-4 py-16">
-        {/* Usage Card */}
         {user && usage && (
           <section className="mb-8">
             <UsageCard usage={usage} onUpgrade={() => setPlansModalOpen(true)} />
@@ -126,7 +103,6 @@ export function SubscriptionWrapper() {
         </Tabs>
       </div>
 
-      {/* Plans Modal */}
       {plans && (
         <PlansModal
           open={plansModalOpen}
@@ -134,7 +110,7 @@ export function SubscriptionWrapper() {
           plans={plans}
           currentPlan={usage?.plan_type}
           onUpgrade={handleUpgrade}
-          isUpgrading={upgradePlan.isPending}
+          isUpgrading={isUpgrading}
         />
       )}
     </>

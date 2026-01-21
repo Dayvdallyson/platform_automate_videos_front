@@ -28,6 +28,12 @@ export interface PlanDetails {
   isPopular?: boolean;
 }
 
+export const PLANS_NAME_TRANSLATE = {
+  Basic: 'Básico',
+  'Pro - Creator': 'Profissional',
+  'Business - Studio': 'Empresarial',
+};
+
 export const PLANS: PlanDetails[] = [
   {
     id: 'basic',

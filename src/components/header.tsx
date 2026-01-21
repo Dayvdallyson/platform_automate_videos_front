@@ -3,7 +3,7 @@
 import { useAuth } from '@/components/auth-provider';
 import { Button } from '@/components/ui/button';
 
-import { CreditCard, LogOut, Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import {
@@ -68,19 +68,6 @@ export function Header() {
                       <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/plans">
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Billing
-                    </Link>
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => logout()}

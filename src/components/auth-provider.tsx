@@ -28,7 +28,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/auth/me`);
+      const res = await fetch(`${API_BASE}/api/auth/me`, {
+        credentials: 'include',
+      });
       if (!res.ok) {
         if (res.status === 401) return null;
         // checking 404 just in case backend isn't ready, treat as no session
@@ -45,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -70,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
@@ -90,7 +94,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST' });
+      await fetch(`${API_BASE}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
     },
     onSuccess: () => {
       queryClient.setQueryData(['auth', 'me'], null);

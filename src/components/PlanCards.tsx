@@ -1,203 +1,131 @@
 'use client';
 
-import { useAuth } from '@/components/auth-provider';
-import { Button } from '@/components/ui/button';
-import { PlanInfo, PlanType } from '@/types/subscription';
+import { PlanCard } from '@/components/PlanCard';
+import { getStoredUserId } from '@/hooks/useSubscription';
+import { billingService } from '@/lib/billing';
 import {
-  Check,
-  Clock,
-  Crown,
-  Droplets,
-  Loader2,
-  Scissors,
-  Sparkles,
-  Video,
-  Zap,
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+  BillingPlanId,
+  PLANS,
+  PLANS_NAME_TRANSLATE,
+  SubscriptionStatusResponse,
+} from '@/types/billing';
+import { Crown } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
-interface PlanCardsProps {
-  plans: PlanInfo[];
-  onSelectPlan: (plan: PlanType) => void;
-  isLoading?: boolean;
-}
+export default function PlanCards() {
+  const [userId] = useState<number | null>(() => {
+    if (typeof window !== 'undefined') {
+      return getStoredUserId();
+    }
+    return null;
+  });
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatusResponse | null>(
+    null,
+  );
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+  const [isSubscribing, setIsSubscribing] = useState<BillingPlanId | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-const planIcons: Record<PlanType, React.ReactNode> = {
-  basic: <Zap className="h-6 w-6" />,
-  pro: <Sparkles className="h-6 w-6" />,
-  business: <Crown className="h-6 w-6" />,
-};
+  const fetchSubscriptionStatus = useCallback(async () => {
+    if (!userId) return;
 
-const planColors: Record<
-  PlanType,
-  { bg: string; text: string; border: string; shadow: string; gradient: string }
-> = {
-  basic: {
-    bg: 'bg-muted/50',
-    text: 'text-foreground',
-    border: 'border-border',
-    shadow: '',
-    gradient: 'from-gray-500 to-gray-600',
-  },
-  pro: {
-    bg: 'bg-primary/10',
-    text: 'text-primary',
-    border: 'border-primary/50',
-    shadow: 'shadow-lg shadow-primary/20',
-    gradient: 'from-primary to-secondary',
-  },
-  business: {
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
-    border: 'border-amber-500/50',
-    shadow: 'shadow-lg shadow-amber-500/20',
-    gradient: 'from-amber-500 to-orange-500',
-  },
-};
+    try {
+      setIsLoadingStatus(true);
+      const status = await billingService.getSubscriptionStatus(userId);
+      setSubscriptionStatus(status);
+    } catch (err) {
+      console.error('Failed to fetch subscription status:', err);
+    } finally {
+      setIsLoadingStatus(false);
+    }
+  }, [userId]);
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(price);
-}
+  useEffect(() => {
+    fetchSubscriptionStatus();
+  }, [fetchSubscriptionStatus]);
 
-export function PlanCards({ plans, onSelectPlan, isLoading }: PlanCardsProps) {
-  const { user } = useAuth();
-  const router = useRouter();
-
-  const handleSelectPlan = (planType: PlanType) => {
-    if (!user) {
-      router.push('/login');
+  const handleSubscribe = async (planId: BillingPlanId) => {
+    if (!userId) {
+      setError('Usuário não encontrado. Por favor, faça login novamente.');
       return;
     }
-    onSelectPlan(planType);
+
+    try {
+      setIsSubscribing(planId);
+      setError(null);
+
+      const response = await billingService.createSubscription(planId, userId);
+      billingService.redirectToCheckout(response.init_point);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao processar assinatura');
+      setIsSubscribing(null);
+    }
   };
 
-  const orderedPlans = ['basic', 'pro', 'business'] as const;
-  const sortedPlans = orderedPlans
-    .map((type) => plans.find((p) => p.type === type))
-    .filter((p): p is PlanInfo => !!p);
+  const isCurrentPlan = (planId: BillingPlanId): boolean => {
+    return subscriptionStatus?.plan_id === planId && subscriptionStatus?.status === 'active';
+  };
 
   return (
-    <div className="w-full">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 gradient-border px-4 py-1.5 mb-4">
+    <main className="min-h-screen bg-background py-16 px-4">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 gradient-border px-4 py-1.5 mb-6">
           <Crown className="h-3.5 w-3.5 text-secondary" />
           <span className="text-xs font-medium text-muted-foreground">Escolha seu plano</span>
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold mb-2">
-          <span className="text-foreground">Comece a criar </span>
-          <span className="text-gradient">cortes virais</span>
-        </h2>
-        <p className="text-muted-foreground text-sm max-w-md mx-auto">
-          Escolha o plano ideal para transformar seus vídeos longos em conteúdo pronto para
-          viralizar
+
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <span className="text-foreground">Desbloqueie o poder da </span>
+          <span className="text-gradient">automação</span>
+        </h1>
+
+        <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base">
+          Escolha o plano ideal para transformar seus vídeos longos em cortes prontos para viralizar
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {sortedPlans.map((plan) => {
-          const colors = planColors[plan.type];
-          const isRecommended = plan.type === 'pro';
+      {error && (
+        <div className="max-w-md mx-auto mb-8 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-center text-sm">
+          {error}
+        </div>
+      )}
 
-          return (
-            <div
-              key={plan.type}
-              className={`relative glass-card card-gradient-border rounded-2xl p-6 border-0 transition-all hover:scale-[1.02] ${isRecommended ? 'ring-2 ring-primary/50' : ''}`}
-            >
-              {/* Header */}
-              <div className="text-center mb-6 mt-2">
-                <div
-                  className={`inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-linear-gradient-to-br ${colors.gradient} text-white mb-3 shadow-lg`}
-                >
-                  {planIcons[plan.type]}
-                </div>
-                <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
-              </div>
+      {subscriptionStatus?.plan_id && subscriptionStatus?.status === 'active' && (
+        <div className="max-w-md mx-auto mb-8 p-4 rounded-lg bg-primary/10 border border-primary/30 text-center">
+          <p className="text-sm text-muted-foreground">Seu plano atual:</p>
+          <p className="text-lg font-bold text-primary">
+            {PLANS.find((p) => p.id === subscriptionStatus.plan_id)?.name ||
+              subscriptionStatus.plan_id}
+          </p>
+        </div>
+      )}
 
-              {/* Price */}
-              <div className="text-center mb-6">
-                <span className={`text-4xl font-bold ${colors.text}`}>
-                  {formatPrice(plan.price_brl)}
-                </span>
-                <span className="text-muted-foreground">/mês</span>
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-3 mb-6">
-                <FeatureItem
-                  icon={<Video className="h-4 w-4" />}
-                  text={`${plan.max_videos_per_month} vídeos/mês`}
-                />
-                <FeatureItem
-                  icon={<Clock className="h-4 w-4" />}
-                  text={`Máx ${plan.max_video_duration_minutes} min/vídeo`}
-                />
-                <FeatureItem
-                  icon={<Scissors className="h-4 w-4" />}
-                  text={`${plan.max_cuts_per_month} cortes/mês`}
-                />
-                <FeatureItem
-                  icon={<Droplets className="h-4 w-4" />}
-                  text={plan.has_watermark ? 'Com watermark' : 'Sem watermark'}
-                  muted={plan.has_watermark}
-                  success={!plan.has_watermark}
-                />
-                <FeatureItem
-                  icon={<Zap className="h-4 w-4" />}
-                  text={`Prioridade ${plan.priority === 'high' ? 'alta' : plan.priority === 'medium' ? 'média' : 'normal'}`}
-                />
-              </ul>
-
-              {/* CTA Button */}
-              <Button
-                className={`w-full bg-linear-gradient-to-r ${colors.gradient} text-white hover:opacity-90 shadow-lg`}
-                onClick={() => handleSelectPlan(plan.type)}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processando...
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Começar com {plan.name}
-                  </>
-                )}
-              </Button>
-            </div>
-          );
-        })}
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        {PLANS.map((plan) => (
+          <PlanCard
+            key={plan.id}
+            plan={{
+              name:
+                PLANS_NAME_TRANSLATE[plan.name as keyof typeof PLANS_NAME_TRANSLATE] || plan.name,
+              description: plan.subtitle,
+              price: plan.price,
+              theme: plan.id,
+              isPopular: plan.isPopular,
+            }}
+            features={plan.features.map((f) => ({ text: f }))}
+            isLoading={isSubscribing === plan.id || isLoadingStatus}
+            isCurrent={isCurrentPlan(plan.id)}
+            onSubscribe={() => handleSubscribe(plan.id)}
+          />
+        ))}
       </div>
-    </div>
-  );
-}
 
-function FeatureItem({
-  icon,
-  text,
-  muted = false,
-  success = false,
-}: {
-  icon: React.ReactNode;
-  text: string;
-  muted?: boolean;
-  success?: boolean;
-}) {
-  return (
-    <li
-      className={`flex items-center gap-3 text-sm ${muted ? 'text-muted-foreground' : 'text-foreground'}`}
-    >
-      <span
-        className={success ? 'text-emerald-500' : muted ? 'text-muted-foreground' : 'text-primary'}
-      >
-        {icon}
-      </span>
-      {text}
-    </li>
+      <div className="text-center mt-12">
+        <p className="text-xs text-muted-foreground">
+          Pagamento seguro via Mercado Pago • Cancele a qualquer momento
+        </p>
+      </div>
+    </main>
   );
 }

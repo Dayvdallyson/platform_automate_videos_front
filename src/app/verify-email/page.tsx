@@ -49,8 +49,8 @@ function VerifyEmailContent() {
   return (
     <Card className="w-full max-w-[400px]">
       <CardHeader className="text-center">
-        <CardTitle>Email Verification</CardTitle>
-        <CardDescription>Verifying your email address...</CardDescription>
+        <CardTitle>Verificação de Email</CardTitle>
+        <CardDescription>Verificando seu endereço de email...</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-6 gap-6">
         {status === 'loading' && (
@@ -64,11 +64,11 @@ function VerifyEmailContent() {
           <div className="flex flex-col items-center gap-4 text-center">
             <CheckCircle className="h-12 w-12 text-green-500" />
             <div className="space-y-1">
-              <h3 className="font-medium text-lg">Verified!</h3>
-              <p className="text-muted-foreground">Your email has been successfully verified.</p>
+              <h3 className="font-medium text-lg">Verificado!</h3>
+              <p className="text-muted-foreground">Seu email foi verificado com sucesso.</p>
             </div>
             <Button asChild className="w-full">
-              <Link href="/login">Go to Login</Link>
+              <Link href="/login">Ir para Login</Link>
             </Button>
           </div>
         )}
@@ -77,11 +77,11 @@ function VerifyEmailContent() {
           <div className="flex flex-col items-center gap-4 text-center">
             <XCircle className="h-12 w-12 text-red-500" />
             <div className="space-y-1">
-              <h3 className="font-medium text-lg">Verification Failed</h3>
+              <h3 className="font-medium text-lg">Falha na Verificação</h3>
               <p className="text-muted-foreground">{message}</p>
             </div>
             <Button asChild variant="outline" className="w-full">
-              <Link href="/login">Back to Login</Link>
+              <Link href="/login">Voltar ao Login</Link>
             </Button>
           </div>
         )}

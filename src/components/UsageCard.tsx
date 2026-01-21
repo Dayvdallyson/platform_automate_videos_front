@@ -125,6 +125,16 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
               Fazer Upgrade
             </Button>
           )}
+          {usage.plan_type === 'business' && onUpgrade && (
+            <Button
+              size="sm"
+              onClick={onUpgrade}
+              className="bg-linear-gradient-to-r from-primary to-secondary hover:opacity-90 text-white shadow-lg shadow-primary/30 transition-all rounded-lg"
+            >
+              <Crown className="mr-1.5 h-3.5 w-3.5" />
+              Mudar Plano
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

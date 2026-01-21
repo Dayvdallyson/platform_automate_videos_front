@@ -35,8 +35,8 @@ export default function RegisterPage() {
       setError('');
       await registerUser(data);
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create account');
     }
   };
 
@@ -57,11 +57,11 @@ export default function RegisterPage() {
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Check your email</h2>
             <p className="text-muted-foreground mb-8">
-              We&apos;ve sent a verification link to{' '}
+              Nós enviamos um link de verificação para{' '}
               <span className="text-white font-medium">{registerForm.getValues('email')}</span>.
             </p>
             <p className="text-sm text-gray-400 mb-8">
-              Please click the link in the email to verify your account and sign in.
+              Por favor, clique no link no email para verificar sua conta e fazer login.
             </p>
             <Button
               asChild
@@ -78,7 +78,6 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-4 relative overflow-hidden bg-background">
-      {/* Background Ambience */}
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[120px] pointer-events-none" />
 
@@ -94,7 +93,7 @@ export default function RegisterPage() {
               Criar Conta
             </h1>
             <p className="text-muted-foreground">
-              Junte-se a nós para começar a criar vídeos incríveis
+              Junte-se a Nós para Começar a Criar Novos Vídeos Incríveis
             </p>
           </div>
 
@@ -105,7 +104,7 @@ export default function RegisterPage() {
               </Label>
               <Input
                 id="name"
-                placeholder="John Doe"
+                placeholder="Dayvd Costa"
                 {...registerForm.register('name')}
                 disabled={isLoading}
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50 focus:ring-primary/20 transition-all"
@@ -122,7 +121,7 @@ export default function RegisterPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="nome@exemplo.com"
                 {...registerForm.register('email')}
                 disabled={isLoading}
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50 focus:ring-primary/20 transition-all"
