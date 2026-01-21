@@ -53,9 +53,9 @@ export default function LoginPage() {
         <div className="glass-card p-8 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-gray-400 mb-2">
-              Welcome Back
+              Bem-vindo de Volta
             </h1>
-            <p className="text-muted-foreground">Sign in to continue to your dashboard</p>
+            <p className="text-muted-foreground">Faça Login Para Continuar Para o Seu Painel</p>
           </div>
 
           <div className="space-y-4 mb-8">
@@ -65,7 +65,7 @@ export default function LoginPage() {
               className="w-full bg-white/5 border-white/10 hover:bg-white/10 hover:text-white transition-all h-11"
             >
               <FaGoogle className="mr-2 h-4 w-4" />
-              Continue with Google
+              Continue Com Google
             </Button>
             <Button
               variant="outline"
@@ -73,7 +73,7 @@ export default function LoginPage() {
               className="w-full bg-white/5 border-white/10 hover:bg-white/10 hover:text-white transition-all h-11"
             >
               <FaFacebook className="mr-2 h-4 w-4" />
-              Continue with Facebook
+              Continue Com Facebook
             </Button>
           </div>
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-transparent px-2 text-muted-foreground backdrop-blur-sm">
-                Or continue with email
+                Ou continue Com Email
               </span>
             </div>
           </div>
@@ -109,13 +109,13 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-gray-300">
-                  Password
+                  Senha
                 </Label>
                 <Link
                   href="/forgot-password"
                   className="text-xs text-primary hover:text-primary/80 transition-colors"
                 >
-                  Forgot password?
+                  Esqueceu sua senha?
                 </Link>
               </div>
               <Input
@@ -146,23 +146,23 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  Entrando...
                 </>
               ) : (
                 <>
-                  Sign In <ArrowRight className="ml-2 h-4 w-4" />
+                  Entrar <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
+            Não tem uma conta?{' '}
             <Link
               href="/register"
               className="text-primary hover:text-primary/80 font-medium transition-colors hover:underline underline-offset-4"
             >
-              Sign up
+              Cadastre-se
             </Link>
           </div>
         </div>

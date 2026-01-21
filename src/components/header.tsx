@@ -38,7 +38,7 @@ export function Header() {
               href="/plans"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              Pricing
+              Preços
             </Link>
           </nav>
         </div>

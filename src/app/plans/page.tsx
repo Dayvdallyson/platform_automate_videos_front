@@ -163,6 +163,12 @@ function PlanCard({ plan, isLoading, isLoadingStatus, isCurrent, onSubscribe }: 
   const colors = planColors[plan.id];
   const isPopular = plan.isPopular;
 
+  const PLANS_NAME_TRANSLATE = {
+    Basic: 'Básico',
+    'Pro - Creator': 'Profissional',
+    'Business - Studio': 'Empresarial',
+  };
+
   return (
     <div
       className={`relative glass-card card-gradient-border rounded-2xl p-6 transition-all hover:scale-[1.02] ${
@@ -186,7 +192,9 @@ function PlanCard({ plan, isLoading, isLoadingStatus, isCurrent, onSubscribe }: 
         >
           {planIcons[plan.id]}
         </div>
-        <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
+        <h3 className="text-xl font-bold text-foreground">
+          {PLANS_NAME_TRANSLATE[plan.name as keyof typeof PLANS_NAME_TRANSLATE]}
+        </h3>
         <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>
       </div>
 

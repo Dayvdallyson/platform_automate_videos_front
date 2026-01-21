@@ -91,15 +91,17 @@ export default function RegisterPage() {
         <div className="glass-card p-8 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-gray-400 mb-2">
-              Create Account
+              Criar Conta
             </h1>
-            <p className="text-muted-foreground">Join us to start creating amazing videos</p>
+            <p className="text-muted-foreground">
+              Junte-se a nós para começar a criar vídeos incríveis
+            </p>
           </div>
 
           <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-gray-300">
-                Name
+                Nome
               </Label>
               <Input
                 id="name"
@@ -134,7 +136,7 @@ export default function RegisterPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-gray-300">
-                Password
+                Senha
               </Label>
               <Input
                 id="password"
@@ -164,23 +166,23 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
+                  Criando Conta...
                 </>
               ) : (
                 <>
-                  Create Account <ArrowRight className="ml-2 h-4 w-4" />
+                  Criar Conta <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
+            Já tem uma conta?{' '}
             <Link
               href="/login"
               className="text-primary hover:text-primary/80 font-medium transition-colors hover:underline underline-offset-4"
             >
-              Sign in
+              Entrar
             </Link>
           </div>
         </div>
