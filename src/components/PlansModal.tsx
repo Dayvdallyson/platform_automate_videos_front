@@ -94,8 +94,7 @@ export function PlansModal({
           {sortedPlans.map((plan) => {
             const colors = planColors[plan.type];
             const isCurrent = currentPlan === plan.type;
-            const canUpgrade =
-              !isCurrent && (!currentPlan || getPlanOrder(plan.type) > getPlanOrder(currentPlan));
+            const canUpgrade = !isCurrent;
 
             return (
               <div
@@ -164,11 +163,8 @@ export function PlansModal({
                   className={`w-full ${
                     isCurrent
                       ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                      : canUpgrade
-                        ? 'bg-linear-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-lg shadow-primary/30'
-                        : 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'cursor-pointer bg-linear-gradient-to-r from-primary to-secondary text-white hover:opacity-90 shadow-lg shadow-primary/30'
                   }`}
-                  disabled={isCurrent || !canUpgrade || isUpgrading}
                   onClick={() => onUpgrade(plan.type)}
                 >
                   {isUpgrading ? (
@@ -213,9 +209,4 @@ function FeatureItem({
       {text}
     </li>
   );
-}
-
-function getPlanOrder(plan: PlanType): number {
-  const order: Record<PlanType, number> = { basic: 1, pro: 2, business: 3 };
-  return order[plan];
 }

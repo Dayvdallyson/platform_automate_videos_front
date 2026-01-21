@@ -36,7 +36,6 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
   return (
     <Card className="glass-card card-gradient-border rounded-2xl border-0">
       <CardContent className="p-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-linear-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/30">
@@ -62,9 +61,7 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
           </div>
         </div>
 
-        {/* Usage Bars */}
         <div className="space-y-4 mb-6">
-          {/* Videos Usage */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -84,7 +81,6 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
             </div>
           </div>
 
-          {/* Cuts Usage */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -105,7 +101,6 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
