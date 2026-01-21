@@ -125,7 +125,7 @@ export function PlanCard({
 
       {/* CTA Button */}
       <Button
-        className={`w-full ${
+        className={`w-full cursor-pointer ${
           isCurrent
             ? 'bg-emerald-500/20 text-emerald-500 cursor-not-allowed'
             : `bg-linear-to-r ${colors.gradient} text-white hover:opacity-90 shadow-lg`

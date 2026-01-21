@@ -10,9 +10,11 @@ import {
   SubscriptionStatusResponse,
 } from '@/types/billing';
 import { Crown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function PlanCards() {
+  const router = useRouter();
   const [userId] = useState<number | null>(() => {
     if (typeof window !== 'undefined') {
       return getStoredUserId();
@@ -49,7 +51,7 @@ export default function PlanCards() {
 
   const handleSubscribe = async (planId: BillingPlanId) => {
     if (!userId) {
-      setError('Usuário não encontrado. Por favor, faça login novamente.');
+      router.push('/login');
       return;
     }
 
