@@ -53,7 +53,7 @@ export function Header() {
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="cursor-pointer relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {user.name?.slice(0, 2).toUpperCase() || 'U'}
@@ -71,7 +71,7 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => logout()}
-                    className="text-red-500 focus:text-red-500"
+                    className="text-red-500 focus:text-red-500 cursor-pointer"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
