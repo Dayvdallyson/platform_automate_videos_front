@@ -13,9 +13,9 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+  email: z.email('Email inválido'),
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
@@ -36,7 +36,7 @@ export default function RegisterPage() {
       await registerUser(data);
       setSuccess(true);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create account');
+      setError(err instanceof Error ? err.message : 'Erro ao criar conta');
     }
   };
 
