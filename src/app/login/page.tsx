@@ -15,8 +15,8 @@ import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import * as z from 'zod';
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(1, 'Senha é obrigatória'),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -37,7 +37,7 @@ export default function LoginPage() {
       await login(data);
       router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to login');
+      setError(err instanceof Error ? err.message : 'Falha ao fazer login');
     }
   };
 
@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-transparent px-2 text-muted-foreground backdrop-blur-sm">
-                Ou continue Com Email
+                Ou Continue Com Email
               </span>
             </div>
           </div>
