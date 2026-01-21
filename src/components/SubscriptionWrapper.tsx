@@ -17,6 +17,8 @@ import { PlanType } from '@/types/subscription';
 import { Loader2, Sparkles, Video } from 'lucide-react';
 import { useState } from 'react';
 
+const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT || 'development';
+
 export function SubscriptionWrapper() {
   const { user, isLoading: authLoading } = useAuth();
   const [plansModalOpen, setPlansModalOpen] = useState(false);
@@ -26,6 +28,10 @@ export function SubscriptionWrapper() {
   const { data: plans, isLoading: plansLoading } = usePlans();
 
   const hasSubscription = !!user && !!usage;
+
+  // In development mode, features are always enabled
+  // In production, features are only enabled if user has an active subscription
+  const canUseFeatures = ENVIRONMENT === 'development' || hasSubscription;
 
   const handleUpgrade = async (plan: PlanType) => {
     if (!user) return;
@@ -67,7 +73,7 @@ export function SubscriptionWrapper() {
         )}
 
         <section className="mb-12">
-          <AddVideoForm />
+          <AddVideoForm disabled={!canUseFeatures} />
         </section>
 
         <Separator className="bg-border/50 mb-10" />

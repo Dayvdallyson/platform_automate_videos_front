@@ -27,7 +27,10 @@ export default function PlanCards() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchSubscriptionStatus = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) {
+      setIsLoadingStatus(false);
+      return;
+    }
 
     try {
       setIsLoadingStatus(true);
