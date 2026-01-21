@@ -1,7 +1,3 @@
-/**
- * Billing service for Mercado Pago subscription integration
- */
-
 import {
   BillingPlanId,
   CreateSubscriptionResponse,
@@ -17,9 +13,6 @@ class BillingService {
     this.baseUrl = baseUrl;
   }
 
-  /**
-   * Creates a subscription and returns the Mercado Pago checkout URL
-   */
   async createSubscription(
     planId: BillingPlanId,
     userId: number,
@@ -32,7 +25,6 @@ class BillingService {
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
-      // Handle different API error formats
       const errorMessage =
         error.detail ||
         error.message ||
@@ -44,9 +36,6 @@ class BillingService {
     return res.json();
   }
 
-  /**
-   * Gets the current subscription status
-   */
   async getSubscriptionStatus(userId: number): Promise<SubscriptionStatusResponse> {
     const res = await fetch(`${this.baseUrl}/api/billing/subscription-status?user_id=${userId}`);
 
@@ -70,11 +59,32 @@ class BillingService {
     return res.json();
   }
 
-  /**
-   * Redirects the user to the Mercado Pago checkout
-   */
   redirectToCheckout(initPoint: string): void {
     window.location.href = initPoint;
+  }
+
+  async confirmPayment(
+    userId: number,
+  ): Promise<{ success: boolean; status: string; planId: string | null }> {
+    try {
+      const subscriptionStatus = await this.getSubscriptionStatus(userId);
+
+      const isSuccess =
+        subscriptionStatus.status === 'active' || subscriptionStatus.status === 'pending';
+
+      return {
+        success: isSuccess,
+        status: subscriptionStatus.status,
+        planId: subscriptionStatus.plan_id,
+      };
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      return {
+        success: false,
+        status: 'error',
+        planId: null,
+      };
+    }
   }
 }
 
