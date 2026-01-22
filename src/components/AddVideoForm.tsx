@@ -3,8 +3,12 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useCreateVideo } from '@/hooks/useVideos';
-import { Download, Link as LinkIcon, Loader2, Lock, Plus } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { useDownloadTracking } from '@/contexts/DownloadTrackingContext';
+import { useDownloadProgress } from '@/hooks/useDownloadProgress';
+import { queryKeys, useCreateVideo } from '@/hooks/useVideos';
+import { useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, Download, Link as LinkIcon, Loader2, Lock, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -15,6 +19,18 @@ interface AddVideoFormProps {
 export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
   const [url, setUrl] = useState('');
   const createVideo = useCreateVideo();
+  const queryClient = useQueryClient();
+  const { addDownload } = useDownloadTracking();
+
+  const { progress, isDownloading, startTracking } = useDownloadProgress({
+    onComplete: () => {
+      toast.success('Download concluído!');
+      queryClient.invalidateQueries({ queryKey: queryKeys.videos });
+    },
+    onError: (error) => {
+      toast.error(error || 'Falha no download');
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,13 +44,23 @@ export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
     }
 
     try {
-      await createVideo.mutateAsync({ url: url.trim() });
-      toast.success('Vídeo adicionado! Download iniciado em segundo plano.');
+      const video = await createVideo.mutateAsync({ url: url.trim() });
+
+      if (video.job_id) {
+        addDownload(video.id, video.job_id);
+        startTracking(video.job_id);
+        toast.success('Download iniciado!');
+      } else {
+        toast.success('Vídeo adicionado! Download iniciado em segundo plano.');
+      }
+
       setUrl('');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Falha ao adicionar vídeo');
     }
   };
+
+  const isProcessing = createVideo.isPending || isDownloading;
 
   return (
     <Card className="glass-card card-gradient-border rounded-2xl border-0 py-0">
@@ -58,6 +84,38 @@ export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
             </p>
           </div>
         </div>
+
+        {isDownloading && (
+          <div className="mb-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                {progress.status === 'done' ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                )}
+                <span className="text-foreground font-medium">
+                  {progress.status === 'done'
+                    ? 'Download concluído'
+                    : progress.status === 'starting'
+                      ? 'Iniciando download...'
+                      : 'Baixando vídeo...'}
+                </span>
+              </div>
+              <span className="text-muted-foreground font-mono">
+                {Math.round(progress.percent)}%
+              </span>
+            </div>
+            <Progress value={progress.percent} className="h-2" />
+            {(progress.speed || progress.eta) && (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{progress.speed || ''}</span>
+                <span>{progress.eta ? `ETA: ${progress.eta}` : ''}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="flex gap-3">
           <div className="relative flex-1">
             <LinkIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -70,19 +128,19 @@ export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
               }
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              disabled={createVideo.isPending || disabled}
+              disabled={isProcessing || disabled}
               className="pl-11 h-11 bg-background/50 border-border/50 text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:ring-primary/20 rounded-xl"
             />
           </div>
           <Button
             type="submit"
-            disabled={createVideo.isPending || disabled}
+            disabled={isProcessing || disabled}
             className={`h-11 px-6 ${disabled ? 'bg-muted text-muted-foreground' : 'bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg shadow-secondary/30'} transition-all rounded-xl font-medium`}
           >
-            {createVideo.isPending ? (
+            {isProcessing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processando...
+                {isDownloading ? `${Math.round(progress.percent)}%` : 'Processando...'}
               </>
             ) : disabled ? (
               <>
@@ -92,7 +150,7 @@ export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
             ) : (
               <>
                 Download
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="ml-2 h-4 w-4" />
               </>
             )}
           </Button>

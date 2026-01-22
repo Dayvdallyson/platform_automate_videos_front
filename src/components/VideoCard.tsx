@@ -4,9 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useDeleteVideo, useGenerateCuts } from '@/hooks/useVideos';
+import { useDownloadTracking } from '@/contexts/DownloadTrackingContext';
+import { useDownloadProgress } from '@/hooks/useDownloadProgress';
+import { queryKeys, useDeleteVideo, useGenerateCuts } from '@/hooks/useVideos';
 import { api } from '@/lib/api';
 import { CutStyle, RawVideo, VideoStatus } from '@/types/video';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle,
   CheckCircle2,
@@ -16,7 +19,7 @@ import {
   Sparkles,
   Trash2,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 const cutStyleOptions: { value: CutStyle; label: string; icon: string }[] = [
@@ -70,12 +73,44 @@ interface VideoCardProps {
 export function VideoCard({ video }: VideoCardProps) {
   const deleteVideo = useDeleteVideo();
   const generateCuts = useGenerateCuts();
+  const queryClient = useQueryClient();
+  const { getJobId, removeDownload } = useDownloadTracking();
   const [selectedStyle, setSelectedStyle] = useState<CutStyle>('viral');
 
   const status = statusConfig[video.status];
   const isReady = video.status === VideoStatus.DONE;
-  const isProcessing =
-    video.status === VideoStatus.DOWNLOADING || video.status === VideoStatus.PROCESSING;
+  const isDownloading = video.status === VideoStatus.DOWNLOADING;
+
+  const jobId = getJobId(video.id);
+
+  const {
+    progress,
+    isDownloading: isTrackingProgress,
+    startTracking,
+  } = useDownloadProgress({
+    onComplete: () => {
+      removeDownload(video.id);
+      queryClient.invalidateQueries({ queryKey: queryKeys.videos });
+    },
+    onStatusChange: (status) => {
+      if (status !== VideoStatus.DONE) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.videos });
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (jobId && isDownloading && !isTrackingProgress) {
+      startTracking(jobId);
+    }
+  }, [jobId, isDownloading, isTrackingProgress, startTracking, video.id]);
+
+  const progressValue = isDownloading && isTrackingProgress ? progress.percent : 100;
+
+  const statusLabel =
+    isDownloading && isTrackingProgress && progress.percent > 0
+      ? `Baixando ${Math.round(progress.percent)}%`
+      : status.label;
 
   const handleDelete = async () => {
     try {
@@ -101,12 +136,6 @@ export function VideoCard({ video }: VideoCardProps) {
 
   return (
     <Card className="group relative overflow-hidden glass-card card-gradient-border rounded-xl border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10">
-      {isProcessing && (
-        <div className="absolute left-0 top-0 right-0 z-10">
-          <Progress value={status.progress} className="h-1 rounded-none bg-muted" />
-        </div>
-      )}
-
       <CardContent className="p-5">
         {video.video_url && (
           <div className="mb-4 rounded-lg overflow-hidden bg-black/20 aspect-video">
@@ -126,17 +155,44 @@ export function VideoCard({ video }: VideoCardProps) {
             </h3>
             <p className="text-xs text-muted-foreground/70 truncate mb-3">{video.url}</p>
 
-            <div className="flex items-center gap-2">
-              <Badge
-                className={`${status.color} text-white border-none flex items-center gap-1.5 text-xs px-2.5 py-0.5`}
-              >
-                {status.icon}
-                {status.label}
-              </Badge>
-              {video.error_message && (
-                <span className="text-xs text-destructive truncate">{video.error_message}</span>
-              )}
-            </div>
+            {isDownloading && (
+              <div className="mb-3 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <Download className="h-3.5 w-3.5 animate-bounce text-secondary" />
+                    <span className="text-foreground font-medium">
+                      {isTrackingProgress && progress.percent > 0
+                        ? 'Baixando vídeo...'
+                        : 'Iniciando download...'}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground font-mono font-medium">
+                    {Math.round(progressValue)}%
+                  </span>
+                </div>
+                <Progress value={progressValue} className="h-2" />
+                {isTrackingProgress && (progress.speed || progress.eta) && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{progress.speed || ''}</span>
+                    <span>{progress.eta ? `ETA: ${progress.eta}` : ''}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isDownloading && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge
+                  className={`${status.color} text-white border-none flex items-center gap-1.5 text-xs px-2.5 py-0.5`}
+                >
+                  {status.icon}
+                  {statusLabel}
+                </Badge>
+                {video.error_message && (
+                  <span className="text-xs text-destructive truncate">{video.error_message}</span>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -159,7 +215,6 @@ export function VideoCard({ video }: VideoCardProps) {
                         >
                           <span className="text-sm">{option.icon}</span>
                         </button>
-                        {/* Tooltip */}
                         <div
                           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5
                           bg-primary text-primary-foreground text-xs font-medium rounded-lg
@@ -168,7 +223,6 @@ export function VideoCard({ video }: VideoCardProps) {
                           pointer-events-none"
                         >
                           {option.label}
-                          {/* Arrow */}
                           <div
                             className="absolute top-full left-1/2 -translate-x-1/2
                             border-4 border-transparent border-t-primary"

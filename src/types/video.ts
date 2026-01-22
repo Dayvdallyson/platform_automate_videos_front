@@ -17,6 +17,7 @@ export interface RawVideo {
   status: VideoStatus;
   created_at: string;
   error_message: string | null;
+  job_id?: string; // For SSE progress tracking
 }
 
 export interface ProcessedVideo {
