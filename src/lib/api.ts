@@ -18,7 +18,7 @@ import {
   UploadResponse,
 } from '@/types/video';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.BACKEND_FASTAPI_URL || 'http://localhost:8000';
 
 // Custom error class for quota exceeded
 export class QuotaExceededError extends Error {

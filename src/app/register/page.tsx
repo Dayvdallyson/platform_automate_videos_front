@@ -43,32 +43,32 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center p-4 relative overflow-hidden bg-background">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-10%] w-125 h-125 bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-125 h-125 bg-secondary/20 rounded-full blur-[120px] pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-[420px] z-10"
+          className="w-full max-w-105 z-10"
         >
           <div className="glass-card p-10 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl text-center">
             <div className="mx-auto w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-6 border border-green-500/30">
               <Mail className="h-8 w-8 text-green-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Check your email</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Verifique o Seu Email</h2>
             <p className="text-muted-foreground mb-8">
-              Nós enviamos um link de verificação para{' '}
+              Nós Enviamos um Link de Verificação Para{' '}
               <span className="text-white font-medium">{registerForm.getValues('email')}</span>.
             </p>
             <p className="text-sm text-gray-400 mb-8">
-              Por favor, clique no link no email para verificar sua conta e fazer login.
+              Por Favor, Clique no Link no Email Para Verificar sua Conta e Fazer Login.
             </p>
             <Button
               asChild
               variant="outline"
               className="w-full bg-white/5 border-white/10 hover:bg-white/10 hover:text-white transition-all h-11"
             >
-              <Link href="/login">Back to Login</Link>
+              <Link href="/login">Voltar Para a Página de Login</Link>
             </Button>
           </div>
         </motion.div>
@@ -78,14 +78,14 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-4 relative overflow-hidden bg-background">
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-125 h-125 bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-125 h-125 bg-secondary/20 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-[420px] z-10"
+        className="w-full max-w-105 z-10"
       >
         <div className="glass-card p-8 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-xl">
           <div className="text-center mb-8">

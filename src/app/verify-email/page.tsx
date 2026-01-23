@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.BACKEND_FASTAPI_URL || 'http://localhost:8000';
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -17,14 +17,12 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     if (!token) {
-      setStatus('error');
-      setMessage('No verification token found.');
       return;
     }
 
     const verify = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/auth/verify-email`, {
+        const res = await fetch(`${API_BASE}/api/ `, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
@@ -47,7 +45,7 @@ function VerifyEmailContent() {
   }, [token]);
 
   return (
-    <Card className="w-full max-w-[400px]">
+    <Card className="w-full max-w-100">
       <CardHeader className="text-center">
         <CardTitle>Verificação de Email</CardTitle>
         <CardDescription>Verificando seu endereço de email...</CardDescription>
