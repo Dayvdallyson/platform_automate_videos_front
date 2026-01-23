@@ -17,7 +17,7 @@ import { PlanType } from '@/types/subscription';
 import { Loader2, Sparkles, Video } from 'lucide-react';
 import { useState } from 'react';
 
-const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT || 'development';
+const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT || 'production';
 
 export function SubscriptionWrapper() {
   const { user, isLoading: authLoading } = useAuth();
@@ -29,8 +29,8 @@ export function SubscriptionWrapper() {
 
   const hasSubscription = !!user && !!usage;
 
-  // In development mode, features are always enabled
-  // In production, features are only enabled if user has an active subscription
+  // * In development mode, features are always enabled
+  // * In production, features are only enabled if user has an active subscription
   const canUseFeatures = ENVIRONMENT === 'development' || hasSubscription;
 
   const handleUpgrade = async (plan: PlanType) => {
@@ -49,7 +49,7 @@ export function SubscriptionWrapper() {
 
   if (authLoading || plansLoading || (user && usageLoading)) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
