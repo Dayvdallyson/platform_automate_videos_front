@@ -1,111 +1,181 @@
-'use client';
-
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-const API_BASE = process.env.BACKEND_FASTAPI_URL || 'http://localhost:8000';
 
 export interface DownloadProgress {
   percent: number;
   speed: string | null;
   eta: string | null;
   status: 'pending' | 'starting' | 'downloading' | 'done' | 'error';
+  message?: string;
 }
 
 interface UseDownloadProgressOptions {
   onComplete?: () => void;
   onError?: (error: string) => void;
-  onStatusChange?: (status: string) => void;
+  onStatusChange?: (status: DownloadProgress['status']) => void;
+  reconnectAttempts?: number;
+  reconnectDelay?: number;
 }
 
-/**
- * Hook for tracking download progress via SSE.
- */
-export function useDownloadProgress(options: UseDownloadProgressOptions = {}) {
-  const [progress, setProgress] = useState<DownloadProgress>({
-    percent: 0,
-    speed: null,
-    eta: null,
-    status: 'pending',
-  });
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [jobId, setJobId] = useState<string | null>(null);
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
-  const eventSourceRef = useRef<EventSource | null>(null);
-  const lastStatusRef = useRef<string>('pending');
-  const { onComplete, onError, onStatusChange } = options;
+const INITIAL_PROGRESS: DownloadProgress = {
+  percent: 0,
+  speed: null,
+  eta: null,
+  status: 'pending',
+};
+
+export function useDownloadProgress(options: UseDownloadProgressOptions = {}) {
+  const {
+    onComplete,
+    onError,
+    onStatusChange,
+    reconnectAttempts = 3,
+    reconnectDelay = 2000,
+  } = options;
+
+  const [progress, setProgress] = useState<DownloadProgress>(INITIAL_PROGRESS);
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectCountRef = useRef(0);
+
+  const jobIdRef = useRef<string | null>(null);
+  const lastStatusRef = useRef<DownloadProgress['status']>('pending');
+  const isActiveRef = useRef(false);
+
+  const clearReconnectTimer = () => {
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+  };
+
+  const cleanupSocket = () => {
+    wsRef.current?.close();
+    wsRef.current = null;
+  };
 
   const stopTracking = useCallback(() => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
-    }
-    setIsDownloading(false);
-    setJobId(null);
+    clearReconnectTimer();
+    cleanupSocket();
+
+    reconnectCountRef.current = 0;
+    isActiveRef.current = false;
+    jobIdRef.current = null;
+    lastStatusRef.current = 'pending';
+
+    setProgress(INITIAL_PROGRESS);
   }, []);
 
-  const startTracking = useCallback(
-    (newJobId: string) => {
-      // Close any existing connection
-      stopTracking();
+  const connectWebSocket = useCallback(
+    (jobId: string) => {
+      const protocol = API_BASE.startsWith('https') ? 'wss' : 'ws';
+      const url = `${protocol}://${API_BASE.replace(
+        /^https?:\/\//,
+        '',
+      )}/api/videos/progress/${jobId}`;
 
-      setJobId(newJobId);
-      setIsDownloading(true);
-      setProgress({
-        percent: 0,
-        speed: null,
-        eta: null,
-        status: 'starting',
-      });
+      const ws = new WebSocket(url);
+      wsRef.current = ws;
 
-      const url = `${API_BASE}/api/videos/progress/${newJobId}`;
-      const eventSource = new EventSource(url);
-      eventSourceRef.current = eventSource;
+      ws.onopen = () => {
+        reconnectCountRef.current = 0;
+        isActiveRef.current = true;
+      };
 
-      eventSource.onmessage = (event) => {
+      ws.onmessage = (event) => {
+        let data: DownloadProgress;
+
         try {
-          const data: DownloadProgress = JSON.parse(event.data);
-          setProgress(data);
-
-          // Notify on status change
-          if (data.status !== lastStatusRef.current) {
-            lastStatusRef.current = data.status;
-            onStatusChange?.(data.status);
-          }
-
-          if (data.status === 'done') {
-            stopTracking();
-            onComplete?.();
-          } else if (data.status === 'error') {
-            stopTracking();
-            onError?.('Download failed');
-          }
+          data = JSON.parse(event.data);
         } catch {
-          // Ignore parse errors
+          return;
+        }
+
+        setProgress((prev) =>
+          prev.status === data.status && prev.percent === data.percent ? prev : data,
+        );
+
+        if (data.status !== lastStatusRef.current) {
+          lastStatusRef.current = data.status;
+          onStatusChange?.(data.status);
+        }
+
+        if (data.status === 'done') {
+          stopTracking();
+          onComplete?.();
+        }
+
+        if (data.status === 'error') {
+          stopTracking();
+          onError?.(data.message ?? 'Download failed');
         }
       };
 
-      eventSource.onerror = () => {
-        stopTracking();
-        onError?.('Connection lost');
+      // Do NOT rely on onerror for logic — browsers hide details
+      ws.onerror = () => {
+        // intentionally empty
+      };
+
+      ws.onclose = (event) => {
+        if (
+          event.code === 1000 ||
+          !isActiveRef.current ||
+          reconnectCountRef.current >= reconnectAttempts
+        ) {
+          if (reconnectCountRef.current >= reconnectAttempts) {
+            onError?.('Connection lost. Maximum reconnection attempts reached.');
+          }
+          stopTracking();
+          return;
+        }
+
+        reconnectCountRef.current += 1;
+
+        reconnectTimerRef.current = setTimeout(() => {
+          if (jobIdRef.current) {
+            connectWebSocket(jobIdRef.current);
+          }
+        }, reconnectDelay);
       };
     },
-    [stopTracking, onComplete, onError, onStatusChange],
+    [onComplete, onError, onStatusChange, reconnectAttempts, reconnectDelay, stopTracking],
   );
 
-  // Cleanup on unmount
+  const startTracking = useCallback(
+    (jobId: string) => {
+      if (jobIdRef.current === jobId && isActiveRef.current) {
+        return;
+      }
+
+      stopTracking();
+
+      jobIdRef.current = jobId;
+      lastStatusRef.current = 'starting';
+
+      setProgress({
+        ...INITIAL_PROGRESS,
+        status: 'starting',
+      });
+
+      connectWebSocket(jobId);
+    },
+    [connectWebSocket, stopTracking],
+  );
+
   useEffect(() => {
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
+      clearReconnectTimer();
+      cleanupSocket();
     };
   }, []);
 
   return {
     progress,
-    isDownloading,
-    jobId,
     startTracking,
     stopTracking,
+    isDownloading: isActiveRef.current,
+    jobId: jobIdRef.current,
   };
 }

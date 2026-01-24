@@ -8,7 +8,16 @@ import { useDownloadTracking } from '@/contexts/DownloadTrackingContext';
 import { useDownloadProgress } from '@/hooks/useDownloadProgress';
 import { queryKeys, useCreateVideo } from '@/hooks/useVideos';
 import { useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Download, Link as LinkIcon, Loader2, Lock, Plus } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Download,
+  Link as LinkIcon,
+  Loader2,
+  Lock,
+  Plus,
+  WifiOff,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -18,18 +27,35 @@ interface AddVideoFormProps {
 
 export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
   const [url, setUrl] = useState('');
+  const [connectionLost, setConnectionLost] = useState(false);
   const createVideo = useCreateVideo();
   const queryClient = useQueryClient();
   const { addDownload } = useDownloadTracking();
 
-  const { progress, isDownloading, startTracking } = useDownloadProgress({
+  const { progress, isDownloading, startTracking, stopTracking } = useDownloadProgress({
     onComplete: () => {
       toast.success('Download concluído!');
+      setConnectionLost(false);
       queryClient.invalidateQueries({ queryKey: queryKeys.videos });
     },
     onError: (error) => {
-      toast.error(error || 'Falha no download');
+      if (error.includes('Connection lost') || error.includes('reconnection')) {
+        setConnectionLost(true);
+        toast.error('Conexão perdida. Tentando reconectar...', {
+          description: 'O download continuará em segundo plano.',
+        });
+      } else {
+        toast.error(error || 'Falha no download');
+      }
     },
+    onStatusChange: (status) => {
+      if (status === 'downloading' && connectionLost) {
+        setConnectionLost(false);
+        toast.success('Conexão restabelecida!');
+      }
+    },
+    reconnectAttempts: 5,
+    reconnectDelay: 3000,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,12 +81,20 @@ export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
       }
 
       setUrl('');
+      setConnectionLost(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Falha ao adicionar vídeo');
     }
   };
 
+  const handleCancel = () => {
+    stopTracking();
+    setConnectionLost(false);
+    toast.info('Download cancelado');
+  };
+
   const isProcessing = createVideo.isPending || isDownloading;
+  const downloadPercent = Math.round(progress.percent ?? 0);
 
   return (
     <Card className="glass-card card-gradient-border rounded-2xl border-0 py-0">
@@ -89,28 +123,46 @@ export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
           <div className="mb-4 space-y-2">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
-                {progress.status === 'done' ? (
+                {connectionLost ? (
+                  <WifiOff className="h-4 w-4 text-destructive animate-pulse" />
+                ) : progress.status === 'done' ? (
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                 ) : (
                   <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 )}
                 <span className="text-foreground font-medium">
-                  {progress.status === 'done'
-                    ? 'Download concluído'
-                    : progress.status === 'starting'
-                      ? 'Iniciando download...'
-                      : 'Baixando vídeo...'}
+                  {connectionLost
+                    ? 'Reconectando...'
+                    : progress.status === 'done'
+                      ? 'Download concluído'
+                      : progress.status === 'starting'
+                        ? 'Iniciando download...'
+                        : 'Baixando vídeo...'}
                 </span>
               </div>
-              <span className="text-muted-foreground font-mono">
-                {Math.round(progress.percent)}%
-              </span>
+              <span className="text-muted-foreground font-mono">{downloadPercent}%</span>
             </div>
-            <Progress value={progress.percent} className="h-2" />
-            {(progress.speed || progress.eta) && (
+            <Progress value={downloadPercent} className="h-2" />
+            {(progress.speed || progress.eta) && !connectionLost && (
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{progress.speed || ''}</span>
                 <span>{progress.eta ? `ETA: ${progress.eta}` : ''}</span>
+              </div>
+            )}
+            {connectionLost && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs text-destructive">
+                  <AlertCircle className="h-3 w-3" />
+                  <span>Conexão perdida. Tentando reconectar...</span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCancel}
+                  className="text-xs h-7 px-3 text-muted-foreground hover:text-destructive"
+                >
+                  Cancelar
+                </Button>
               </div>
             )}
           </div>
