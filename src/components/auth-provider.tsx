@@ -1,9 +1,10 @@
 'use client';
 
+import { clearStoredUserId, setStoredUserId } from '@/hooks/useSubscription';
 import { CreateUserRequest, User } from '@/types/subscription';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { toast } from 'sonner';
 
 interface AuthContextType {
@@ -41,6 +42,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     retry: false,
   });
+
+  // Sync user ID to local storage for legacy hooks (useUserId)
+  useEffect(() => {
+    if (user?.id) {
+      setStoredUserId(user.id);
+    } else if (!isLoading) {
+      clearStoredUserId();
+    }
+  }, [user, isLoading]);
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password?: string }) => {

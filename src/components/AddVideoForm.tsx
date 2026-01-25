@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { useDownloadTracking } from '@/contexts/DownloadTrackingContext';
 import { useDownloadProgress } from '@/hooks/useDownloadProgress';
+import { useUserId } from '@/hooks/useSubscription';
 import { queryKeys, useCreateVideo } from '@/hooks/useVideos';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -27,6 +28,8 @@ interface AddVideoFormProps {
 
 export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
   const [url, setUrl] = useState('');
+  const userId = useUserId();
+
   const [connectionLost, setConnectionLost] = useState(false);
   const createVideo = useCreateVideo();
   const queryClient = useQueryClient();
@@ -70,7 +73,10 @@ export function AddVideoForm({ disabled = false }: AddVideoFormProps) {
     }
 
     try {
-      const video = await createVideo.mutateAsync({ url: url.trim() });
+      const video = await createVideo.mutateAsync({
+        url: url.trim(),
+        userId: userId ?? undefined,
+      });
 
       if (video.job_id) {
         addDownload(video.id, video.job_id);

@@ -2,12 +2,15 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUserId } from '@/hooks/useSubscription';
 import { useVideos } from '@/hooks/useVideos';
 import { AlertCircle, Video } from 'lucide-react';
 import { VideoCard } from './VideoCard';
 
 export function VideoList() {
-  const { data: videos, isLoading, error } = useVideos();
+  const userId = useUserId();
+
+  const { data: videos, isLoading, error } = useVideos(userId);
 
   if (isLoading) {
     return (

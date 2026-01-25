@@ -66,8 +66,11 @@ class ApiClient {
     return res.json();
   }
 
-  async listVideos(): Promise<RawVideo[]> {
-    const res = await fetch(`${this.baseUrl}/api/videos/`);
+  async listVideos(userId?: number): Promise<RawVideo[]> {
+    const params = new URLSearchParams();
+    if (userId) params.append('user_id', userId.toString());
+
+    const res = await fetch(`${this.baseUrl}/api/videos/?${params.toString()}`);
     if (!res.ok) throw new Error('Failed to fetch videos');
     return res.json();
   }
@@ -106,8 +109,11 @@ class ApiClient {
     return res.json();
   }
 
-  async listProcessedVideos(): Promise<ProcessedVideo[]> {
-    const res = await fetch(`${this.baseUrl}/api/processed/`);
+  async listProcessedVideos(userId?: number): Promise<ProcessedVideo[]> {
+    const params = new URLSearchParams();
+    if (userId) params.append('user_id', userId.toString());
+
+    const res = await fetch(`${this.baseUrl}/api/processed/?${params.toString()}`);
     if (!res.ok) throw new Error('Failed to fetch processed videos');
     return res.json();
   }

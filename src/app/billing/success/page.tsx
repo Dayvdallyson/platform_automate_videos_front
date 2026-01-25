@@ -39,8 +39,7 @@ function BillingSuccessContent() {
         } else {
           setStatus('error');
         }
-      } catch (error) {
-        console.error('Error checking payment status:', error);
+      } catch {
         setStatus('error');
       }
     };

@@ -3,6 +3,7 @@
 import { api } from '@/lib/api';
 import { CreateUserRequest, PlanInfo, PlanType, UsageSummary, User } from '@/types/subscription';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSyncExternalStore } from 'react';
 
 export const subscriptionQueryKeys = {
   plans: ['subscription', 'plans'] as const,
@@ -103,6 +104,37 @@ export function useCreateUser() {
 
 const USER_ID_KEY = 'clipforge_user_id';
 
+// ... (existing helper functions)
+
+const userStore = {
+  subscribe(callback: () => void) {
+    if (typeof window === 'undefined') return () => {};
+    window.addEventListener('storage', callback);
+    // Also listen for custom events if we modify storage locally without window event triggering
+    window.addEventListener('user-storage-update', callback);
+    return () => {
+      window.removeEventListener('storage', callback);
+      window.removeEventListener('user-storage-update', callback);
+    };
+  },
+  getSnapshot() {
+    if (typeof window === 'undefined') return null;
+    const stored = localStorage.getItem(USER_ID_KEY);
+    return stored ? parseInt(stored, 10) : null;
+  },
+  getServerSnapshot() {
+    return null;
+  },
+};
+
+export function useUserId() {
+  return useSyncExternalStore(
+    userStore.subscribe,
+    userStore.getSnapshot,
+    userStore.getServerSnapshot,
+  );
+}
+
 export function getStoredUserId(): number | null {
   if (typeof window === 'undefined') return null;
   const stored = localStorage.getItem(USER_ID_KEY);
@@ -112,9 +144,12 @@ export function getStoredUserId(): number | null {
 export function setStoredUserId(userId: number): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(USER_ID_KEY, userId.toString());
+  // Dispatch custom event to update other components in the same window
+  window.dispatchEvent(new Event('user-storage-update'));
 }
 
 export function clearStoredUserId(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(USER_ID_KEY);
+  window.dispatchEvent(new Event('user-storage-update'));
 }

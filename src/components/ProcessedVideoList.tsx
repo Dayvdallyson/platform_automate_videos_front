@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
+import { useUserId } from '@/hooks/useSubscription';
 import { useProcessedVideos, useUploadToPlatform } from '@/hooks/useVideos';
 import { api } from '@/lib/api';
 import { ConnectionStatus, ProcessedVideo } from '@/types/video';
@@ -269,7 +270,9 @@ function ProcessedVideoCard({ video, connections }: ProcessedVideoCardProps) {
 }
 
 export function ProcessedVideoList() {
-  const { data: videos, isLoading: videosLoading, error } = useProcessedVideos();
+  const userId = useUserId();
+
+  const { data: videos, isLoading: videosLoading, error } = useProcessedVideos(userId);
   const { data: connections, isLoading: connectionsLoading } = useSocialConnections();
 
   const isLoading = videosLoading || connectionsLoading;

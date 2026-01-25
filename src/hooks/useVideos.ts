@@ -9,10 +9,11 @@ export const queryKeys = {
   processedVideos: ['processedVideos'] as const,
 };
 
-export function useVideos() {
+export function useVideos(userId?: number | null) {
   return useQuery<RawVideo[]>({
-    queryKey: queryKeys.videos,
-    queryFn: () => api.listVideos(),
+    queryKey: userId ? [...queryKeys.videos, userId] : queryKeys.videos,
+    queryFn: () => api.listVideos(userId ?? undefined),
+    // enabled: !!userId,
   });
 }
 
@@ -38,10 +39,11 @@ export function useDeleteVideo() {
   });
 }
 
-export function useProcessedVideos() {
+export function useProcessedVideos(userId?: number | null) {
   return useQuery<ProcessedVideo[]>({
-    queryKey: queryKeys.processedVideos,
-    queryFn: () => api.listProcessedVideos(),
+    queryKey: userId ? [...queryKeys.processedVideos, userId] : queryKeys.processedVideos,
+    queryFn: () => api.listProcessedVideos(userId ?? undefined),
+    enabled: !!userId,
   });
 }
 
