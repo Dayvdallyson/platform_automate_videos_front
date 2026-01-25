@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useDownloadTracking } from '@/contexts/DownloadTrackingContext';
 import { useDownloadProgress } from '@/hooks/useDownloadProgress';
+import { useUserId } from '@/hooks/useSubscription';
 import { queryKeys, useDeleteVideo, useGenerateCuts } from '@/hooks/useVideos';
 import { api } from '@/lib/api';
 import { CutStyle, RawVideo, VideoStatus } from '@/types/video';
@@ -67,6 +68,7 @@ export function VideoCard({ video }: VideoCardProps) {
   const queryClient = useQueryClient();
   const deleteVideo = useDeleteVideo();
   const generateCuts = useGenerateCuts();
+  const user_id = useUserId();
   const { getJobId, removeDownload } = useDownloadTracking();
 
   const [selectedStyle, setSelectedStyle] = useState<CutStyle>('viral');
@@ -128,6 +130,7 @@ export function VideoCard({ video }: VideoCardProps) {
     try {
       await generateCuts.mutateAsync({
         videoId: video.id,
+        userId: user_id ?? undefined,
         style: selectedStyle,
       });
       toast.success('Processamento iniciado! Pode levar alguns minutos.');

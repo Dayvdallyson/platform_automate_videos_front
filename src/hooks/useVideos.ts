@@ -13,7 +13,7 @@ export function useVideos(userId?: number | null) {
   return useQuery<RawVideo[]>({
     queryKey: userId ? [...queryKeys.videos, userId] : queryKeys.videos,
     queryFn: () => api.listVideos(userId ?? undefined),
-    // enabled: !!userId,
+    enabled: !!userId,
   });
 }
 
@@ -51,8 +51,15 @@ export function useGenerateCuts() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ videoId, style, userId }: { videoId: number; style: string; userId?: number }) =>
-      api.generateCuts(videoId, style, userId),
+    mutationFn: ({
+      videoId,
+      style,
+      userId,
+    }: {
+      videoId: number;
+      style: string;
+      userId?: number | undefined;
+    }) => api.generateCuts(videoId, style, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.videos });
       queryClient.invalidateQueries({ queryKey: queryKeys.processedVideos });
