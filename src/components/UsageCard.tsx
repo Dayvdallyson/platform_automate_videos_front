@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { UsageSummary } from '@/types/subscription';
-import { Calendar, Crown, Droplets, Scissors, TrendingUp, Video } from 'lucide-react';
+import { Calendar, Crown, Droplets, Scissors, TrendingUp } from 'lucide-react';
 
 interface UsageCardProps {
   usage: UsageSummary;
@@ -13,7 +13,6 @@ interface UsageCardProps {
 }
 
 export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
-  const videosPercent = Math.min(usage.videos_usage_percent, 100);
   const cutsPercent = Math.min(usage.cuts_usage_percent, 100);
 
   const getProgressColor = (percent: number) => {
@@ -65,25 +64,6 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Video className="h-4 w-4" />
-                <span>Vídeos processados</span>
-              </div>
-              <span className="font-medium text-foreground">
-                {usage.videos_processed} / {usage.max_videos}
-              </span>
-            </div>
-            <div className="relative">
-              <Progress value={videosPercent} className="h-2 bg-muted" />
-              <div
-                className={`absolute top-0 left-0 h-2 rounded-full transition-all ${getProgressColor(videosPercent)}`}
-                style={{ width: `${videosPercent}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
                 <Scissors className="h-4 w-4" />
                 <span>Cortes gerados</span>
               </div>
@@ -114,7 +94,7 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
             <Button
               size="sm"
               onClick={onUpgrade}
-              className="bg-linear-gradient-to-r from-primary to-secondary hover:opacity-90 text-white shadow-lg shadow-primary/30 transition-all rounded-lg"
+              className="cursor-pointer bg-linear-gradient-to-r from-primary to-secondary hover:opacity-90 text-white shadow-lg shadow-primary/30 transition-all rounded-lg"
             >
               <Crown className="mr-1.5 h-3.5 w-3.5" />
               Fazer Upgrade

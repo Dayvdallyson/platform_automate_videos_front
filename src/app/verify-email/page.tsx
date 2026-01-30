@@ -22,7 +22,7 @@ function VerifyEmailContent() {
 
     const verify = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/ `, {
+        const res = await fetch(`${API_BASE}/api/auth/verify-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
@@ -32,6 +32,7 @@ function VerifyEmailContent() {
           setStatus('success');
         } else {
           const data = await res.json().catch(() => ({}));
+          console.log('data error', data);
           setStatus('error');
           setMessage(data.detail || 'Verification failed. Token may be invalid or expired.');
         }

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 // test
 export const metadata: Metadata = {
-  title: 'Video Processor | AI-Powered Video Editing',
+  title: 'Cortes Virais | Criação de cortes com IA',
   description:
     'Download, process, and upload videos to TikTok and Instagram with AI-powered transcription and vertical clip generation.',
 };
