@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { UsageSummary } from '@/types/subscription';
-import { Calendar, Crown, Droplets, Scissors, TrendingUp } from 'lucide-react';
+import { Calendar, Crown, Scissors, TrendingUp } from 'lucide-react';
 
 interface UsageCardProps {
   usage: UsageSummary;
@@ -51,12 +51,6 @@ export function UsageCard({ usage, onUpgrade }: UsageCardProps) {
               <Crown className="h-3 w-3 mr-1" />
               {usage.plan_name}
             </Badge>
-            {usage.has_watermark && (
-              <Badge variant="outline" className="border-border text-muted-foreground">
-                <Droplets className="h-3 w-3 mr-1" />
-                Watermark
-              </Badge>
-            )}
           </div>
         </div>
 
